@@ -1,0 +1,21 @@
+{
+  "name": "travelcompanion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:35537/git/dekoire/TravelCompanion"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/standalone": "^7.29.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
