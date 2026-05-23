@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   weekLabel: { fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', fontWeight: '600', paddingHorizontal: 6, paddingBottom: 12, paddingTop: 6 },
   dayCard: { borderRadius: 18, overflow: 'hidden', borderWidth: 0.5, flexDirection: 'row', alignItems: 'stretch', marginBottom: 10 },
   dayPhoto: { width: 110, position: 'relative' },
-  dayPhotoFade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent' },
+  dayPhotoFade: { ...StyleSheet.absoluteFill, backgroundColor: 'transparent' },
   dayInfo: { flex: 1, padding: 14, paddingHorizontal: 16, justifyContent: 'center' },
   dayLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   dayLabelText: { fontSize: 10, letterSpacing: 1.4, textTransform: 'uppercase', fontWeight: '600' },

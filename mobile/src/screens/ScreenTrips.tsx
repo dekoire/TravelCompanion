@@ -104,7 +104,7 @@ export default function ScreenTrips({ onNewTrip, onOpenTrip, onShare }: Props) {
                   {/* Progress */}
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
                     <View style={styles.progressBg}>
-                      <LinearGradient colors={[...SIRI_LINEAR_COLORS]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ width: `${(featured.progress / featured.total) * 100}%`, height: '100%' }} />
+                      <LinearGradient colors={[...SIRI_LINEAR_COLORS]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ width: `${((featured.progress ?? 0) / (featured.total ?? 1)) * 100}%`, height: '100%' }} />
                     </View>
                     <Text style={styles.progressText}>{featured.progress} / {featured.total}</Text>
                   </View>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   filterLabel: { fontSize: 12, fontWeight: '600' },
   filterCount: { fontSize: 10, fontWeight: '500' },
   featuredCard: { borderRadius: 22, overflow: 'hidden', borderWidth: 0.5 },
-  featuredImg: { ...StyleSheet.absoluteFillObject },
+  featuredImg: { ...StyleSheet.absoluteFill },
   liveBadge: { position: 'absolute', top: 14, left: 14, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99, backgroundColor: 'rgba(11,10,24,0.4)', borderWidth: 0.5, borderColor: 'rgba(126,231,182,0.3)' },
   liveDot: { width: 6, height: 6, borderRadius: 3 },
   liveText: { fontSize: 10, color: '#7EE7B6', letterSpacing: 1.4, textTransform: 'uppercase', fontWeight: '600' },
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   progressText: { fontSize: 11, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
   grid: { paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   gridCard: { width: '47.5%', borderRadius: 16, overflow: 'hidden', borderWidth: 0.5 },
-  pastOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11,10,24,0.35)' },
+  pastOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(11,10,24,0.35)' },
   gridBadge: { position: 'absolute', top: 8, left: 8, paddingHorizontal: 7, paddingVertical: 2, borderRadius: 4, backgroundColor: 'rgba(11,10,24,0.6)' },
   gridBadgeText: { fontSize: 9, color: '#fff', letterSpacing: 1.2, textTransform: 'uppercase', fontWeight: '600' },
   gridCardName: { fontSize: 14, fontWeight: '600', letterSpacing: -0.2, lineHeight: 18 },

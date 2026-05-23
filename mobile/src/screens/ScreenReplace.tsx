@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   altList: { paddingHorizontal: 16, gap: 10 },
   altCard: { borderRadius: 20, overflow: 'hidden' },
   altImgWrap: { height: 140, position: 'relative' },
-  altImgGrad: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent' },
+  altImgGrad: { ...StyleSheet.absoluteFill, backgroundColor: 'transparent' },
   aiPickBadge: { position: 'absolute', top: 12, left: 12, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99 },
   aiPickText: { fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: '#fff' },
   selCheck: { position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },

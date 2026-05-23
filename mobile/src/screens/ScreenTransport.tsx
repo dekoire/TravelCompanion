@@ -139,7 +139,7 @@ export default function ScreenTransport({ from, to, onClose, onConfirm }: Props)
 }
 
 const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject, zIndex: 50, backgroundColor: 'rgba(11,10,24,0.55)', justifyContent: 'flex-end' },
+  overlay: { ...StyleSheet.absoluteFill, zIndex: 50, backgroundColor: 'rgba(11,10,24,0.55)', justifyContent: 'flex-end' },
   sheet: { borderTopLeftRadius: 28, borderTopRightRadius: 28, borderWidth: 0.5, borderBottomWidth: 0, maxHeight: '92%', overflow: 'hidden' },
   handle: { width: 38, height: 4, borderRadius: 2, alignSelf: 'center', marginTop: 8, marginBottom: 14 },
   routeHeader: { paddingHorizontal: 22, paddingBottom: 14 },
