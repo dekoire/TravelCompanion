@@ -105,4 +105,7 @@ export const ChapterCardBatch = z.object({
 }).strict();
 
 export type ChapterCard = z.infer<typeof ChapterCard>;
+export type OpeningType = z.infer<typeof OpeningType>;
+export type ClosingType = z.infer<typeof ClosingType>;
+export type SceneType = z.infer<typeof SceneType>;
 export type SceneCard = z.infer<typeof SceneCard>;

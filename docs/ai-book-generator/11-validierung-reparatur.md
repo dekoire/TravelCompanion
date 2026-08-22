@@ -114,6 +114,7 @@ Auswertung der Scene-Card-Ausdrücke gegen den gefoldeten State:
 | `dialogue_tag_monotony` | > 85 % identischer Tag ODER > 2 exotische Tags/Kapitel |
 | `adverb_density` | Adverbien auf `-lich/-weise/-lig` > X pro 1.000 Wörter |
 | `opening_similarity` | Trigramm-Jaccard der ersten 200 Wörter > 0,32 zu einem der letzten 5 Kapitel → dann Embedding-Cosinus > 0,88 → Issue |
+| `name_near_miss` | **Editierdistanz** ≤ Budget (längenabhängig, max. 2) oder Trigramm-Jaccard 0,72–0,99. Bei kurzen Eigennamen entscheidet die Editierdistanz: „Ardmore"/„Ardmoor" kommt auf nur 0,4 Jaccard, weil zwei abweichende Trigramme bei sieben Zeichen zu stark wiegen. |
 | `opening_type_repeat` | `openingType` = einer der letzten 3 |
 | `metaphor_domain_overuse` | > 40 % der Bilder aus einer Domäne |
 | `sensory_imbalance` | Abweichung > 20 Punkte vom `sensoryBalance` |
@@ -122,13 +123,22 @@ Auswertung der Scene-Card-Ausdrücke gegen den gefoldeten State:
 ### 2.9 Dialog (exakte Definition)
 ```ts
 function dialogueRatio(text: string, locale: LocaleProfile): number {
-  const stripped = removeThoughtMarkup(text);            // *kursiv* = Gedanke, zählt nicht
-  let inside = 0;
-  for (const [open, close] of locale.quotePairs) inside += charsBetween(stripped, open, close);
+  const stripped = removeThoughtMarkup(text);       // *kursiv* = Gedanke, zählt nicht
   const total = stripped.replace(/\s/g, '').length;
+  let inside = 0;
+  for (const [open, close] of locale.quotePairs) {   // erster passender Stil gewinnt
+    const hit = charsBetween(stripped, open, close);
+    if (hit > 0) { inside = hit; break; }
+  }
   return inside / total;
 }
 ```
+
+**Gemischte Anführungszeichen müssen toleriert werden.** Modelle liefern regelmäßig `„Text"`
+statt `„Text“`. Wer nur das exakte Paar sucht, misst den Dialoganteil als 0 und repariert
+danach das falsche Problem. Der Matcher akzeptiert deshalb je Öffnungszeichen mehrere
+zulässige Schlusszeichen; die Typografie wird separat geprüft und im Renderer vereinheitlicht.
+Implementierung: [`packages/domain/src/text.ts`](../../book-generator/packages/domain/src/text.ts).
 Issue `dialogue_ratio_out_of_corridor`, wenn außerhalb `card.dialogueCorridor`
 (Toleranz ±0,05). Zusätzlich `dialogue_monotony`, wenn die Standardabweichung des
 Dialoganteils über die letzten 8 Kapitel < 0,05 ist — dann klingt jedes Kapitel gleich.

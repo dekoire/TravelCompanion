@@ -25,7 +25,7 @@ export const FactDelta = z.object({
   op: z.enum(['set', 'close']),
   subject: Slug,
   predicate: Predicate,
-  value: z.union([z.string(), z.number(), z.boolean(), z.record(z.unknown())]).nullable(),
+  value: z.union([z.string(), z.number(), z.boolean(), z.record(z.string(), z.unknown())]).nullable(),
   valueKey: z.string().max(60).optional(),
   validFromScene: z.number().int().optional(),
   validUntilScene: z.number().int().optional(),
@@ -154,3 +154,10 @@ export const ChapterExtraction = z.object({
 }).strict();
 
 export type ChapterExtraction = z.infer<typeof ChapterExtraction>;
+export type SceneExtraction = z.infer<typeof SceneExtraction>;
+export type ChapterSummary = z.infer<typeof ChapterSummary>;
+export type ExtractedEvent = z.infer<typeof ExtractedEvent>;
+export type FactDelta = z.infer<typeof FactDelta>;
+export type KnowledgeDelta = z.infer<typeof KnowledgeDelta>;
+export type RelationshipDelta = z.infer<typeof RelationshipDelta>;
+export type ThreadDelta = z.infer<typeof ThreadDelta>;

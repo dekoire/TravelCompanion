@@ -7,6 +7,11 @@ vollständige Bücher erzeugt — von der Kurzgeschichte (3.000 Wörter) bis zum
 (250.000+ Wörter), belletristisch **und** als Sachbuch, mit Cover, Metadaten, Export
 (EPUB/PDF/DOCX) und optionalem Hörbuch.
 
+> **Implementierungsstand:** M0 und M1 sind gebaut und getestet —
+> [`book-generator/`](../../book-generator/) (304 Tests, keine Modellkosten).
+> Was fertig ist, steht in [book-generator/README.md](../../book-generator/README.md);
+> was als Nächstes kommt, in [21-roadmap.md](21-roadmap.md).
+
 ## Leitsatz
 
 > **Das LLM schreibt Text. Postgres besitzt die Wahrheit. Deterministischer Code entscheidet,

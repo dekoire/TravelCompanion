@@ -1,14 +1,18 @@
 # 15 — JSON-Verträge
 
-Alle Schemas liegen als Zod-Definitionen in [`schemas/`](schemas/):
+Alle Schemas sind **implementiert und getestet** in
+[`book-generator/packages/schemas/src/`](../../book-generator/packages/schemas/src/) — das ist
+die einzige Quelle, diese Doku beschreibt nur die Regeln dahinter.
 
 | Datei | Inhalt |
 |---|---|
-| [`common.ts`](schemas/common.ts) | Bausteine: `Evidence`, Prädikat- und Event-Katalog, Wissensstufen, Bedingungsgrammatik |
-| [`bookspec.ts`](schemas/bookspec.ts) | `BookSpec`, `ContentRating`, `CharacterSeed`, `StyleSpec` |
-| [`cards.ts`](schemas/cards.ts) | `ChapterCard`, `SceneCard`, Opening-/Closing-/Szenentypen |
-| [`extraction.ts`](schemas/extraction.ts) | `ChapterExtraction` mit allen Delta-Typen und `ChapterSummary` |
-| [`issues.ts`](schemas/issues.ts) | `Issue`, `SemanticCheckResult`, `VerificationResult`, `RatingClassification`, `ModerationResult` |
+| [`common.ts`](../../book-generator/packages/schemas/src/common.ts) | Bausteine: `Evidence`, Prädikat- und Event-Katalog, Wissensstufen, Bedingungsgrammatik |
+| [`bookspec.ts`](../../book-generator/packages/schemas/src/bookspec.ts) | `BookSpec`, `ContentRating`, `CharacterSeed`, `StyleSpec` |
+| [`wizard.ts`](../../book-generator/packages/schemas/src/wizard.ts) | `WizardInput` — die Rohform vor `deriveSpec` |
+| [`cards.ts`](../../book-generator/packages/schemas/src/cards.ts) | `ChapterCard`, `SceneCard`, Opening-/Closing-/Szenentypen |
+| [`extraction.ts`](../../book-generator/packages/schemas/src/extraction.ts) | `ChapterExtraction` mit allen Delta-Typen und `ChapterSummary` |
+| [`issues.ts`](../../book-generator/packages/schemas/src/issues.ts) | `Issue`, `SemanticCheckResult`, `VerificationResult`, `RatingClassification`, `ModerationResult` |
+| [`schemas.test.ts`](../../book-generator/packages/schemas/src/schemas.test.ts) | 32 Tests: gültige Payloads und die Ablehnung ungültiger |
 
 Nicht als eigene Datei ausgeführt, aber nach denselben Regeln zu bauen: `StoryBible`,
 `StyleProfile`, `VoiceProfile`, `EndingContract`, `Thread`, `Clue`, `Outline`,

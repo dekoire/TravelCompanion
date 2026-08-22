@@ -185,8 +185,11 @@ if (result.finishReason === 'length') {
 ```
 
 - Maximal **2** Fortsetzungen pro Kapitel, dann Wechsel auf `scene_by_scene`.
-- `stitchWithOverlap` sucht den längsten gemeinsamen Suffix/Präfix (mind. 30 Zeichen) und
-  entfernt die Dopplung — deterministisch, kein LLM.
+- `stitchWithOverlap` sucht den längsten gemeinsamen Suffix/Präfix (Standard: mind. **16**
+  Zeichen) und entfernt die Dopplung — deterministisch, kein LLM. Die Schwelle ist bewusst
+  niedrig: eine stehengebliebene Dopplung ist ein sichtbarer Textfehler, ein fälschlich
+  entfernter 16-Zeichen-Anschluss kaum wahrnehmbar. 16 Zeichen identischer Prosa sind
+  praktisch nie Zufall.
 - Der Partial wird **vor** dem Fortsetzungs-Call persistiert (`chapter_versions.partial_text`),
   damit ein Funktions-Timeout keinen Output vernichtet.
 

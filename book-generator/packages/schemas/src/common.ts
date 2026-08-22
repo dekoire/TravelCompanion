@@ -10,7 +10,7 @@ import { z } from 'zod';
 export const Uuid = z.string().uuid();
 export const Slug = z.string().regex(/^[a-z][a-z0-9_]{1,60}$/);
 export const TempId = z.string().regex(/^[a-z][a-z0-9_]{0,30}$/);
-export const IsoDateTime = z.string().datetime({ offset: true });
+export const IsoDateTime = z.iso.datetime({ offset: true });
 
 /** Wörtlicher Beleg im Kapiteltext. Wird deterministisch gegroundet (10 §3). */
 export const Evidence = z.object({
@@ -69,3 +69,18 @@ export const RelationshipDimensions = z.object({
 export const ConditionExpr = z.string()
   .regex(/^(location|possession|owner|knows|believes|alive|injured|present|trust|closeness|address_mode|state|flag|usage)\([a-z0-9_,\s]+\)\s*(=|!=|>=|<=|in|notin)\s*[A-Za-z0-9_"'\-\s]+$/)
   .max(200);
+
+// ─── Abgeleitete TypeScript-Typen ────────────────────────────────────────────
+// Zod-Schemas sind Werte; der Rest des Systems braucht auch die Typen.
+
+export type Severity = z.infer<typeof Severity>;
+export type Language = z.infer<typeof Language>;
+export type Track = z.infer<typeof Track>;
+export type SizeClass = z.infer<typeof SizeClass>;
+export type Pov = z.infer<typeof Pov>;
+export type Tense = z.infer<typeof Tense>;
+export type Predicate = z.infer<typeof Predicate>;
+export type EventType = z.infer<typeof EventType>;
+export type KnowledgeLevel = z.infer<typeof KnowledgeLevel>;
+export type RelationshipDimensions = z.infer<typeof RelationshipDimensions>;
+export type Evidence = z.infer<typeof Evidence>;

@@ -156,13 +156,21 @@ interface LocaleProfile {
 export function countWords(text: string, locale: string): number {
   const seg = new Intl.Segmenter(locale, { granularity: 'word' });
   let n = 0;
-  for (const s of seg.segment(stripMarkup(text))) if (s.isWordLike) n++;
+  for (const s of seg.segment(joinHyphenatedWords(stripMarkup(text)))) if (s.isWordLike) n++;
   return n;
 }
 ```
-Kein `split(/\s+/)`. Deutsche Komposita zählen als **ein** Wort, Zahlen und Bindestrich-
-Komposita ebenfalls. Diese Funktion ist die *einzige* Wortzählung im System (Budget, Validierung,
-Seitenprognose, Preis) — sonst driften Kennzahlen auseinander.
+Kein `split(/\s+/)`. Diese Funktion ist die *einzige* Wortzählung im System (Budget,
+Validierung, Seitenprognose, Preis) — sonst driften Kennzahlen auseinander.
+Implementierung und Tests:
+[`packages/domain/src/text.ts`](../../book-generator/packages/domain/src/text.ts).
+
+**`joinHyphenatedWords` ist nicht optional.** `Intl.Segmenter` zerlegt „E-Mail" in zwei und
+„Schwarz-Weiß-Fotografie" in drei wortartige Segmente. Die Publishing-Konvention (und Word)
+zählt jeweils eins — und danach richten sich Preis und Seitenprognose. Verbunden wird nur der
+einfache Bindestrich zwischen zwei Buchstaben; Gedankenstriche bleiben Satzzeichen.
+Umlaute, Zahlen (`1.234`, `3,5`) und Apostrophformen (`geht's`) zählt der Segmenter bereits
+korrekt als ein Wort.
 
 ### 5.2 Deutsche Besonderheiten (relevant für Checks)
 

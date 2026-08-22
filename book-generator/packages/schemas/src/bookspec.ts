@@ -112,13 +112,18 @@ export const BookSpec = z.object({
 
   technical: z.object({
     modelProfileId: z.string(),
-    modelProfileSnapshot: z.record(z.unknown()),
+    modelProfileSnapshot: z.record(z.string(), z.unknown()),
     promptRegistryVersion: z.string(),
     schemaVersion: z.string(),
-    localeProfile: z.record(z.unknown()),
+    localeProfile: z.record(z.string(), z.unknown()),
     createdAt: z.string(),
     pipelineProfile: SizeClass,
   }).strict(),
 }).strict();
 
 export type BookSpec = z.infer<typeof BookSpec>;
+export type ContentRating = z.infer<typeof ContentRating>;
+export type CharacterSeed = z.infer<typeof CharacterSeed>;
+export type StyleSpec = z.infer<typeof StyleSpec>;
+export type QuoteStyle = StyleSpec['quoteStyle'];
+export type PovMode = BookSpec['form']['povMode'];

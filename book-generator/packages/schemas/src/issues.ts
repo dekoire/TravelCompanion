@@ -70,9 +70,15 @@ export const RatingClassification = z.object({
 /** Eingangsmoderation (13 §4). */
 export const ModerationResult = z.object({
   action: z.enum(['allow', 'restrict', 'block']),
-  categories: z.record(z.number().min(0).max(1)),
+  categories: z.record(z.string(), z.number().min(0).max(1)),
   reasons: z.array(z.string().max(200)).max(6),
   suggestedRewrite: z.string().max(1000).nullable(),
 }).strict();
 
 export type Issue = z.infer<typeof Issue>;
+export type IssueCategory = z.infer<typeof IssueCategory>;
+export type RepairStrategy = z.infer<typeof RepairStrategy>;
+export type SemanticCheckResult = z.infer<typeof SemanticCheckResult>;
+export type VerificationResult = z.infer<typeof VerificationResult>;
+export type RatingClassification = z.infer<typeof RatingClassification>;
+export type ModerationResult = z.infer<typeof ModerationResult>;
