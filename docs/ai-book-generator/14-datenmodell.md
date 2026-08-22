@@ -2,7 +2,7 @@
 
 Vollständiges DDL: [schema.sql](schema.sql). Dieses Dokument erklärt die Entscheidungen.
 
-## 1. Tabellenübersicht (46 Tabellen)
+## 1. Tabellenübersicht (53 Tabellen)
 
 | Gruppe | Tabellen |
 |---|---|
