@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["node"],
+    "paths": {
+      "@abg/schemas": ["./packages/schemas/src/index.ts"],
+      "@abg/domain": ["./packages/domain/src/index.ts"],
+      "@abg/llm": ["./packages/llm/src/index.ts"]
+    },
+    "baseUrl": "."
+  },
+  "include": ["packages/*/src/**/*.ts", "vitest.config.ts"]
+}
