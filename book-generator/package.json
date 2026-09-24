@@ -16,7 +16,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check": "npm run typecheck && npm run test",
-    "clean": "tsc --build --clean"
+    "clean": "tsc --build --clean",
+    "serve": "node apps/server/build.mjs && node apps/server/dist/server.mjs",
+    "build:server": "node apps/server/build.mjs",
+    "build:preview": "node apps/preview/build.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

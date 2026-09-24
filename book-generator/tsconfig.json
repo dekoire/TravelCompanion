@@ -12,6 +12,12 @@
     },
     {
       "path": "./packages/render"
+    },
+    {
+      "path": "./packages/picturebook"
+    },
+    {
+      "path": "./packages/api"
     }
   ]
 }

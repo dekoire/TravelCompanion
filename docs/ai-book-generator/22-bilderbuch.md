@@ -171,7 +171,22 @@ Für `pre_reader` und `early_reader` ist ein wiederkehrender Satz das stärkste 
 Kinder warten darauf und sprechen ihn mit. Er trägt erst ab **drei** Vorkommen; darunter wirkt
 er wie ein Versehen. Deshalb eine eigene Prüfung statt einer Stilempfehlung im Prompt.
 
-## 8. Was noch fehlt
+## 8. Als Service
+
+Der Bilderbuch-Track ist von der Roman-Maschinerie gelöst und steht als eigener Dienst:
+[API.md](../../book-generator/API.md). Kein Gateway, keine Budgets, keine Kostenrechnung —
+die Schnittstelle zu einem Sprachmodell ist eine Funktion mit einem String rein und einem
+String raus. Alles, was den Dienst ausmacht, läuft davor und danach und braucht kein Modell.
+
+Zwei Dinge weist die API ausdrücklich aus:
+
+* `generator.synthetic` — war überhaupt ein Sprachmodell beteiligt?
+* `understood.derived` — welches Feld kam wirklich aus dem Prompt und welches ist Vorgabe?
+
+Ohne diese beiden Felder kann ein Aufrufer nicht unterscheiden, ob er ein erzeugtes Buch
+oder eine ausgefüllte Vorlage bekommen hat.
+
+## 9. Was noch fehlt
 
 | Lücke | Nötig für |
 |---|---|
@@ -182,13 +197,16 @@ er wie ein Versehen. Deshalb eine eigene Prüfung statt einer Stilempfehlung im 
 | Vorlesbarkeit | Silbenzahl, Betonung, Reim — messbar, aber noch nicht gebaut |
 | Persistenz | Der Entwurf liegt derzeit nur im Browser-Speicher der Vorschau |
 
-## 9. Implementierung
+## 10. Implementierung
 
 | Datei | Inhalt |
 |---|---|
 | [`schemas/picturebook.ts`](../../book-generator/packages/schemas/src/picturebook.ts) | `Spread`, `CharacterSheet`, `StyleGuide`, `ImageBrief`, `PictureBookPlan` |
 | [`domain/picturebook.ts`](../../book-generator/packages/domain/src/picturebook.ts) | Seitenplan, Lesestufen, Prompt-Komposition, Seeds |
 | [`domain/picturebook-validate.ts`](../../book-generator/packages/domain/src/picturebook-validate.ts) | alle Prüfungen aus §6 |
-| [`llm/picturebook-pipeline.ts`](../../book-generator/packages/llm/src/picturebook-pipeline.ts) | Ablauf Code → LLM → Code |
+| [`picturebook/pipeline.ts`](../../book-generator/packages/picturebook/src/pipeline.ts) | Ablauf Code → Modell → Code |
+| [`picturebook/prompt.ts`](../../book-generator/packages/picturebook/src/prompt.ts) | Prompt lesen, Auftrag für das Modell bauen |
+| [`picturebook/generator.ts`](../../book-generator/packages/picturebook/src/generator.ts) | Die ganze Schnittstelle zum Sprachmodell |
+| [`api/service.ts`](../../book-generator/packages/api/src/service.ts) | HTTP-API, siehe [API.md](../../book-generator/API.md) |
 | [`render/placeholder.ts`](../../book-generator/packages/render/src/placeholder.ts) | deterministischer SVG-Platzhalter |
 | [`apps/preview`](../../book-generator/apps/preview/) | interaktive Vorschau mit Editor |

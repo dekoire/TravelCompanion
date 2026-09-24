@@ -12,6 +12,8 @@ export default defineConfig({
       '@abg/domain': new URL('./packages/domain/src/index.ts', import.meta.url).pathname,
       '@abg/llm': new URL('./packages/llm/src/index.ts', import.meta.url).pathname,
       '@abg/render': new URL('./packages/render/src/index.ts', import.meta.url).pathname,
+      '@abg/picturebook': new URL('./packages/picturebook/src/index.ts', import.meta.url).pathname,
+      '@abg/api': new URL('./packages/api/src/index.ts', import.meta.url).pathname,
     },
   },
 });

@@ -1,15 +1,20 @@
-import type { Provider, ProviderRequest, ProviderResponse } from './types';
+import { READING_RULES, type ReadingLevel } from '@abg/domain';
+import type { CompletionRequest, TextGenerator } from './generator';
+import { parsePrompt } from './prompt';
 
 /**
- * Demo-Provider: erzeugt einen Bilderbuch-Entwurf ohne jedes Modell.
+ * Demo-Generator: erzeugt einen Bilderbuch-Entwurf OHNE Sprachmodell.
  *
- * WICHTIG: Das ist KEINE KI-Generierung. Der Provider setzt aus Bausteinen einen
- * Entwurf zusammen, der Schema und Pruefungen besteht — damit Pipeline, Layout
- * und Editor ohne API-Key und ohne Kosten vollstaendig sichtbar sind.
+ * WICHTIG, und die API weist es auch so aus: Das ist keine Generierung. Der
+ * Generator fuellt vorgeschriebene Beat-Vorlagen mit dem, was sich aus dem
+ * Prompt heuristisch lesen laesst. Zwei verschiedene Ideen ergeben dieselben
+ * Doppelseiten mit anderen Namen.
  *
- * Er implementiert dieselbe `Provider`-Schnittstelle wie ein echter Anbieter und
- * laeuft durch denselben Gateway (Budget, Idempotenz, Schema-Validierung).
- * Ein echter Bild-/Textprovider ersetzt spaeter genau diese eine Klasse.
+ * Sein Zweck: Seitenplan, Pruefungen, Layout, Bildprompts und die komplette API
+ * sind damit ohne Anbieter und ohne Kosten lauffaehig und testbar.
+ *
+ * Er liest seine Parameter aus demselben Prompt, den auch ein echtes Modell
+ * bekommt — was nebenbei belegt, dass der Prompt alles Noetige enthaelt.
  */
 
 export interface DemoBookInput {
@@ -23,21 +28,40 @@ export interface DemoBookInput {
   spreadCount: number;
   medium: 'watercolor' | 'cut_paper' | 'gouache' | 'crayon' | 'digital_soft' | 'ink_wash' | 'collage';
   paletteHue: number;
-  /** Steuert die Textlaenge: aeltere Kinder brauchen mehr Text pro Doppelseite. */
-  readingLevel?: 'pre_reader' | 'early_reader' | 'independent';
+  readingLevel?: ReadingLevel;
 }
 
-export const DEMO_INPUT_MARKER = 'demo-input';
+const MEDIA = ['watercolor', 'cut_paper', 'gouache', 'crayon', 'digital_soft',
+               'ink_wash', 'collage'] as const;
 
-/** Der Pipeline-Code haengt die Eingabe so an den Prompt an. */
-export function encodeDemoInput(input: DemoBookInput): string {
-  return `<!--${DEMO_INPUT_MARKER}:${JSON.stringify(input)}-->`;
-}
+/** Liest die Parameter aus dem Auftragstext, den buildModelPrompt erzeugt. */
+export function demoInputFromPrompt(prompt: string): DemoBookInput {
+  const idea = /<idee>([\s\S]*?)<\/idee>/.exec(prompt)?.[1]?.trim() ?? prompt;
+  const hints = parsePrompt(idea);
 
-function decodeDemoInput(prompt: string): DemoBookInput | null {
-  const m = new RegExp(`<!--${DEMO_INPUT_MARKER}:([\\s\\S]*?)-->`).exec(prompt);
-  if (!m?.[1]) return null;
-  try { return JSON.parse(m[1]) as DemoBookInput; } catch { return null; }
+  const spreadCount = Number(/genau\s+(\d+)\s+Doppelseiten/.exec(prompt)?.[1] ?? 14);
+  const ageLabel = /LESESTUFE\s+(\S+)/.exec(prompt)?.[1] ?? '3–5';
+  const readingLevel = (Object.values(READING_RULES)
+    .find((r) => r.ageLabel === ageLabel)?.level ?? 'pre_reader') as ReadingLevel;
+
+  const mediumRaw = /Technik:\s*([a-z_]+)/i.exec(prompt)?.[1] ?? 'watercolor';
+  const medium = (MEDIA as readonly string[]).includes(mediumRaw)
+    ? mediumRaw as DemoBookInput['medium'] : 'watercolor';
+  const paletteHue = Number(/Palette:\s*(\d+)\s*Grad/.exec(prompt)?.[1] ?? 120);
+
+  return {
+    idea,
+    heroName: hints.heroName,
+    heroKind: hints.heroKind,
+    ...(hints.companionName ? { companionName: hints.companionName } : {}),
+    ...(hints.companionKind ? { companionKind: hints.companionKind } : {}),
+    place: hints.place,
+    goal: hints.goal,
+    spreadCount,
+    medium,
+    paletteHue,
+    readingLevel,
+  };
 }
 
 // ─── Beat-Bausteine ──────────────────────────────────────────────────────────
@@ -337,30 +361,13 @@ function titleFrom(idea: string, hero: string): string {
   return `${hero} und das, was noch fehlt`;
 }
 
-export class DemoPictureBookProvider implements Provider {
+export class DemoGenerator implements TextGenerator {
   readonly name = 'demo';
-  readonly calls: ProviderRequest[] = [];
+  readonly synthetic = true;
+  readonly calls: CompletionRequest[] = [];
 
-  async generate(req: ProviderRequest): Promise<ProviderResponse> {
+  async complete(req: CompletionRequest): Promise<string> {
     this.calls.push(req);
-    const input = decodeDemoInput(req.prompt);
-    if (!input) {
-      throw new Error('DemoPictureBookProvider: keine Demo-Eingabe im Prompt gefunden');
-    }
-    const draft = buildDemoDraft(input);
-    const text = JSON.stringify(draft);
-    const inputTokens = Math.ceil((req.prompt.length + req.system.length) / 4);
-    return {
-      text,
-      finishReason: 'stop',
-      usage: {
-        inputTokens,
-        outputTokens: Math.ceil(text.length / 4),
-        cachedInputTokens: req.cacheKey ? Math.floor(inputTokens * 0.55) : 0,
-        thinkingTokens: 0,
-      },
-      modelId: req.modelId,
-      requestId: `demo_${this.calls.length}`,
-    };
+    return JSON.stringify(buildDemoDraft(demoInputFromPrompt(req.prompt)));
   }
 }

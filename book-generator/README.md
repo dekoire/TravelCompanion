@@ -6,11 +6,19 @@ plus der vollständige **Bilderbuch-Track** ([22](../docs/ai-book-generator/22-b
 
 ```bash
 npm install
-npm run check              # Typecheck (inkl. Tests) + 395 Tests
-node apps/preview/build.mjs  # klickbare Vorschau -> apps/preview/dist/
+npm run check                          # Typecheck (inkl. Tests) + 492 Tests
+ABG_ALLOW_ANONYMOUS=lokal npm run serve   # Bilderbuch-Service auf :8787
+npm run build:preview                  # klickbare Vorschau -> apps/preview/dist/
 ```
 
-Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Provider.
+Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Generatoren.
+
+```bash
+curl -X POST localhost:8787/v1/books -H 'content-type: application/json' \
+  -d '{"prompt":"Ein kleiner Fuchs namens Nuri, der das Meer sucht"}'
+```
+
+Vollständige Schnittstelle: [API.md](API.md).
 
 ## Was fertig ist
 
@@ -18,6 +26,8 @@ Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Provider.
 |---|---|---|
 | **`@abg/schemas`** | Zod-Verträge: `BookSpec`, `WizardInput`, `ChapterCard`, `SceneCard`, `ChapterExtraction`, `Issue`, Moderations- und Verifikationsergebnisse. Alles `.strict()`. | [15](../docs/ai-book-generator/15-json-schemas.md) |
 | **`@abg/domain`** | I/O-freie Fachlogik: Wortzählung, Dialogmessung, Größenklassen, `deriveSpec`, `validateSpec`, Act-Skelett, Budget- und Kostenmodell, **Quote-Grounding**, Bedingungs-Parser, Phrasenstatistik, Ähnlichkeitsmaße, Idempotenz-Schlüssel. | [02](../docs/ai-book-generator/02-domaenenmodell.md), [03](../docs/ai-book-generator/03-bookspec.md), [10](../docs/ai-book-generator/10-extraktion.md), [18](../docs/ai-book-generator/18-kosten-budget.md) |
+| **`@abg/picturebook`** | Der eigenständige Kern des Dienstes: Generator-Schnittstelle, Prompt-Verarbeitung, Pipeline, Ablage. Hängt an keinem Anbieter und an keiner Datenbank. | [API.md](API.md) |
+| **`@abg/api`** | HTTP-Schicht auf Web-Standards (Request/Response). Läuft unter node:http, Vercel, Cloudflare Workers, Deno oder Bun. | [API.md](API.md) |
 | **`@abg/render`** | Deterministischer SVG-Platzhalter für Bilderbuch-Doppelseiten: Layout, Textfluss im Satzspiegel, Farbidentität je Figur. Ersetzt später ein echtes Bildmodell an genau einer Stelle. | [22](../docs/ai-book-generator/22-bilderbuch.md) |
 | **`@abg/llm`** | Provider-Gateway: Capability-Routing, Prompt-Assemblierung mit Cache-Grenze, Nutzertext-Neutralisierung, Retry-Politik, Truncation-Fortsetzung, Structured Output mit genau einem Repair-Call, Budgetwächter, Idempotenz-Speicher, Mock-Provider mit Fehlerinjektion. | [01](../docs/ai-book-generator/01-systemarchitektur.md), [09](../docs/ai-book-generator/09-context-builder.md), [13](../docs/ai-book-generator/13-prompting-sicherheit.md) |
 
@@ -117,8 +127,12 @@ new MockProvider({ scripts: {
 | `pipeline.test.ts` | 3 | Integration: Idee → geprüftes Kapitel |
 | `hash.test.ts` | 21 | SHA-256 gegen offizielle Vektoren und `node:crypto` |
 | `picturebook.test.ts` | 44 | Druckbogen, Lesestufen, Prompt-Komposition, alle Prüfungen |
-| `picturebook-pipeline.test.ts` | 26 | Integration Bilderbuch + Platzhalter-Renderer |
-| **Summe** | **395** | |
+| `picturebook/pipeline.test.ts` | 28 | Integration Bilderbuch, Generatorfehler, Platzhalter |
+| `picturebook/prompt.test.ts` | 41 | Prompt-Heuristik und Modell-Auftrag |
+| `picturebook/store.test.ts` | 12 | Ablage, Mandantentrennung, Blättern |
+| `api/service.test.ts` | 43 | alle Endpunkte, Fehlerübersetzung, Protokoll |
+| `api/auth.test.ts` | 14 | Schlüssel, Mandanten, Zeitkonstanz |
+| **Summe** | **492** | |
 
 ## Drei Stellen, an denen die Tests die Doku korrigiert haben
 
@@ -137,6 +151,24 @@ new MockProvider({ scripts: {
 5. **`node:crypto` in einem als plattformfrei deklarierten Paket.** Fiel erst auf, als
    `@abg/domain` im Browser laufen sollte. Ersetzt durch eine eigene SHA-256-Implementierung,
    geprüft gegen die offiziellen Testvektoren und gegen `node:crypto`.
+
+## Als Service
+
+Der Bilderbuch-Teil ist von der Roman-Maschinerie gelöst: kein Gateway, keine Budgets,
+keine Kostenrechnung. Die gesamte Schnittstelle zu einem Sprachmodell ist eine Funktion
+mit einem String rein und einem String raus.
+
+```ts
+interface TextGenerator {
+  readonly name: string;
+  readonly synthetic: boolean;   // true = kein Modell beteiligt
+  complete(req: CompletionRequest): Promise<string>;
+}
+```
+
+Wer den Dienst betreibt, bringt seinen Anbieter mit und rechnet dort ab. Der Wert liegt
+in dem, was davor und danach passiert — Druckbogen, Lesestufe, Figurenkonsistenz,
+Bildprompt-Komposition und 18 Prüfungen, alles ohne Modell.
 
 ## Bilderbuch-Track
 

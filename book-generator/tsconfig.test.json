@@ -20,6 +20,12 @@
       ],
       "@abg/render": [
         "./packages/render/src/index.ts"
+      ],
+      "@abg/picturebook": [
+        "./packages/picturebook/src/index.ts"
+      ],
+      "@abg/api": [
+        "./packages/api/src/index.ts"
       ]
     },
     "baseUrl": "."

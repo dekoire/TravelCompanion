@@ -1,7 +1,6 @@
 import {
-  DemoPictureBookProvider, LlmGateway, MemoryIdempotencyStore, mockProfile,
-  generatePictureBook, type PictureBookRequest,
-} from '@abg/llm';
+  DemoGenerator, createPictureBook, type CreateBookInput,
+} from '@abg/picturebook';
 import {
   READING_RULES, composeImagePrompt, planPages, readingLevelForAge,
   spreadSentences, spreadWordCount, validatePictureBook,
@@ -70,32 +69,27 @@ async function generate(): Promise<void> {
   btn.disabled = true;
   btn.textContent = 'Wird gesetzt …';
 
-  const req: PictureBookRequest = {
-    bookId: 'preview',
-    idea: f['idea'] ?? '',
-    heroName: f['heroName'] ?? 'Mika',
-    heroKind: f['heroKind'] ?? 'ein Kind',
-    companionName: f['companionName'] || undefined,
-    companionKind: f['companionKind'] || undefined,
-    place: f['place'] ?? '',
-    goal: f['goal'] ?? '',
+  const overrides: NonNullable<CreateBookInput['overrides']> = {};
+  if (f['heroName']) overrides.heroName = f['heroName'];
+  if (f['heroKind']) overrides.heroKind = f['heroKind'];
+  if (f['companionName']) overrides.companionName = f['companionName'];
+  if (f['companionKind']) overrides.companionKind = f['companionKind'];
+  if (f['place']) overrides.place = f['place'];
+  if (f['goal']) overrides.goal = f['goal'];
+
+  const input: CreateBookInput = {
+    prompt: f['idea'] ?? '',
     pageCount: Number(f['pageCount']) as State['pageCount'],
-    targetAge: (f['targetAge'] ?? '6+') as PictureBookRequest['targetAge'],
-    medium: (f['medium'] ?? 'watercolor') as PictureBookRequest['medium'],
+    targetAge: (f['targetAge'] ?? '6+') as CreateBookInput['targetAge'],
+    medium: (f['medium'] ?? 'watercolor') as CreateBookInput['medium'],
     paletteHue: Number(f['paletteHue'] ?? 120),
+    overrides,
   };
 
-  const gw = new LlmGateway({
-    providers: { mock: new DemoPictureBookProvider() },
-    modelProfile: mockProfile(),
-    store: new MemoryIdempotencyStore(),
-    randomId: () => Math.random().toString(16).slice(2, 7),
-  });
-
   try {
-    const result = await generatePictureBook(req, gw);
+    const result = await createPictureBook(input, new DemoGenerator());
     state.plan = result.plan;
-    state.pageCount = req.pageCount;
+    state.pageCount = result.pageCount;
     state.readingLevel = result.readingLevel;
     state.selected = null;
     renderAll();
