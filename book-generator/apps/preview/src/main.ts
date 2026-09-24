@@ -63,7 +63,8 @@ function readForm(): Record<string, string> {
 
 // ─── Erzeugen ────────────────────────────────────────────────────────────────
 
-async function generate(): Promise<void> {
+async function generate(opts: { scroll?: boolean } = {}): Promise<void> {
+  const scroll = opts.scroll ?? true;
   const f = readForm();
   const btn = $<HTMLButtonElement>('generate');
   btn.disabled = true;
@@ -95,7 +96,9 @@ async function generate(): Promise<void> {
     renderAll();
     save();
     $('book').hidden = false;
-    $('book').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Beim ersten Laden NICHT scrollen: sonst landet man mitten im fertigen
+    // Buch und sieht das Eingabefeld nie.
+    if (scroll) $('book').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     $('report').innerHTML = `<p class="issue issue-block">Konnte das Buch nicht setzen: `
       + `${escapeHtml(String((err as Error).message))}</p>`;
@@ -330,7 +333,7 @@ function escapeHtml(s: string): string {
 // ─── Verdrahtung ─────────────────────────────────────────────────────────────
 
 function boot(): void {
-  $('generate').addEventListener('click', () => void generate());
+  $('generate').addEventListener('click', () => void generate({ scroll: true }));
 
   $('sheet').addEventListener('click', (e) => {
     const fig = (e.target as HTMLElement).closest<HTMLElement>('[data-spread]');
@@ -392,8 +395,9 @@ function boot(): void {
     renderAll();
     $('book').hidden = false;
   } else {
-    // Die Seite zeigt sofort ein gesetztes Buch — ein leeres Formular zeigt nichts.
-    void generate();
+    // Die Seite zeigt sofort ein gesetztes Buch — ein leeres Formular zeigt
+    // nichts. Ohne Scrollen, damit der Einstieg oben sichtbar bleibt.
+    void generate({ scroll: false });
   }
 }
 

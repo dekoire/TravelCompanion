@@ -111,6 +111,20 @@
   .demo-note svg { flex: none; margin-top: 2px; color: var(--caution); }
 
   /* ── Flächen ──────────────────────────────────────────── */
+  .start-here {
+    margin: 20px 0 0; padding: 13px 16px;
+    background: var(--ok-bg); border-left: 3px solid var(--press);
+    border-radius: 0 8px 8px 0; font-size: 15px; max-width: 72ch;
+  }
+  .start-here strong { font-weight: 600; }
+  .start-here em { font-style: normal; font-weight: 600; color: var(--press); }
+  .start-here a { color: var(--press); margin-left: 6px; white-space: nowrap; }
+
+  .step {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--press); margin: 0 0 6px;
+  }
+
   section.panel {
     background: var(--surface); border: 1px solid var(--rule);
     border-radius: 10px; padding: 22px; margin-top: 26px; box-shadow: var(--shadow);
@@ -307,6 +321,13 @@
       Lesestufe geprüft und Seite für Seite überarbeitet.
     </p>
 
+    <p class="start-here">
+      <strong>So geht es los:</strong> Unten die Idee eintragen und auf
+      <em>Bilderbuch setzen</em> klicken. Unter dem Formular steht bereits ein fertiges
+      Beispiel — das wird dabei ersetzt.
+      <a href="https://claude.ai/artifact/VRUKG6fvhs5Qe4NvmVDADJ" target="_blank" rel="noopener">Fertiges Demo-Buch ansehen →</a>
+    </p>
+
     <div class="demo-note">
       <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
         <circle cx="10" cy="10" r="8"/><path d="M10 6.5v4.2M10 13.6v.2"/>
@@ -321,6 +342,7 @@
   </header>
 
   <section class="panel">
+    <p class="step">Schritt 1</p>
     <h2>Buch anlegen</h2>
     <p class="sub">Aus diesen Angaben werden Seitenplan, Figurenblätter und Doppelseiten gesetzt.</p>
 
@@ -414,12 +436,14 @@
     <div class="workspace">
       <main>
         <section class="panel" style="margin-top:0">
+          <p class="step">Schritt 2</p>
           <h2>Andruckbogen</h2>
           <p class="sub">Jede Doppelseite mit ihren echten Seitenzahlen. Anklicken zum Überarbeiten.</p>
           <div id="sheet"></div>
         </section>
 
         <section class="panel" id="editor" hidden>
+          <p class="step">Schritt 3</p>
           <h2 id="editorTitle">Doppelseite</h2>
           <p class="sub">Änderungen wirken sofort auf Vorschau und Prüfung.</p>
 
