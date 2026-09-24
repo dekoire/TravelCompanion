@@ -8,7 +8,8 @@ plus der vollständige **Bilderbuch-Track** ([22](../docs/ai-book-generator/22-b
 npm install
 npm run check                          # Typecheck (inkl. Tests) + 492 Tests
 ABG_ALLOW_ANONYMOUS=lokal npm run serve   # Bilderbuch-Service auf :8787
-npm run build:preview                  # klickbare Vorschau -> apps/preview/dist/
+npm run build:preview                  # Werkzeug: Wizard, Andruckbogen, Editor
+npm run build:demo                     # fertiges Demo-Buch zum Durchblaettern
 ```
 
 Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Generatoren.
@@ -132,7 +133,7 @@ new MockProvider({ scripts: {
 | `picturebook/store.test.ts` | 12 | Ablage, Mandantentrennung, Blättern |
 | `api/service.test.ts` | 43 | alle Endpunkte, Fehlerübersetzung, Protokoll |
 | `api/auth.test.ts` | 14 | Schlüssel, Mandanten, Zeitkonstanz |
-| **Summe** | **492** | |
+| **Summe** | **497** | |
 
 ## Drei Stellen, an denen die Tests die Doku korrigiert haben
 
@@ -151,6 +152,14 @@ new MockProvider({ scripts: {
 5. **`node:crypto` in einem als plattformfrei deklarierten Paket.** Fiel erst auf, als
    `@abg/domain` im Browser laufen sollte. Ersetzt durch eine eigene SHA-256-Implementierung,
    geprüft gegen die offiziellen Testvektoren und gegen `node:crypto`.
+6. **Kollidierende SVG-IDs.** Die Platzhalter benutzten feste IDs (`sky`, `ground`, `frame`).
+   Solange jedes SVG in einer eigenen `data:`-URI steckt, fällt das nicht auf — sobald
+   mehrere in *ein* Dokument eingebettet werden, löst `url(#sky)` bei allen auf die erste
+   Definition auf, und jede Seite bekommt die Farben der ersten. Latent, bis das Demo-Buch
+   sie inline setzte.
+7. **Deutsche Nebensätze sind verbletzt.** „den Ort sucht, an dem der Wind anfängt" verlor
+   den Teil nach dem Verb — also genau den, der die Geschichte ausmacht. Der Titel fiel
+   deshalb auf eine Notlösung zurück statt auf „Nuri und der Ort, an dem der Wind anfängt".
 
 ## Als Service
 
@@ -185,8 +194,12 @@ das Bild ist der Inhalt, der Text die Bildunterschrift.
 * **Redundanzprüfung** — misst, ob der Text nur nacherzählt, was das Bild ohnehin zeigt.
   Der häufigste Fehler in generierten Bilderbüchern, und deterministisch messbar.
 
-`node apps/preview/build.mjs` baut daraus eine klickbare Seite mit Andruckbogen,
-Doppelseiten-Editor und Live-Prüfung. Details: [apps/preview/README.md](apps/preview/README.md).
+Dazu zwei gebaute Seiten, beide aus denselben Paketen:
+
+* **`npm run build:preview`** — das Werkzeug: Wizard, Andruckbogen, Doppelseiten-Editor,
+  Live-Prüfung. [apps/preview/README.md](apps/preview/README.md)
+* **`npm run build:demo`** — das Ergebnis: ein fertiges Buch zum Durchblättern, ohne
+  Werkzeugleisten. [apps/demo-book/README.md](apps/demo-book/README.md)
 
 ## Nächste Schritte (M2)
 

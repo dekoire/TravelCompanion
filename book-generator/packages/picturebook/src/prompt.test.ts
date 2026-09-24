@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { buildModelPrompt, cutAtBoundary, parsePrompt, stripLeadingWith } from './prompt';
+import {
+  buildModelPrompt, cutAtBoundary, goalObject, parsePrompt, stripLeadingWith, trailingClause,
+} from './prompt';
 
 describe('parsePrompt — Figur', () => {
   it('erkennt einen Namen nach "namens"', () => {
@@ -198,5 +200,28 @@ describe('cutAtBoundary und stripLeadingWith', () => {
 
   it('lässt Text ohne Begleitphrase unverändert', () => {
     expect(stripLeadingWith('das Meer')).toBe('das Meer');
+  });
+});
+
+describe('Nachgestellte Relativsätze', () => {
+  it('behält den Teil nach dem Verb', () => {
+    // Deutsch ist im Nebensatz verbletzt. Ohne diese Behandlung geht der
+    // schönste Teil des Ziels verloren.
+    const p = parsePrompt('Ein Fuchs namens Nuri, der den Ort sucht, an dem der Wind anfängt');
+    expect(p.goal).toContain('an dem der Wind anfängt');
+    expect(p.goal).toContain('Ort');
+  });
+
+  it('erkennt verschiedene Anschlüsse', () => {
+    expect(trailingClause('x sucht, an dem etwas ist', 7)).toContain('an dem');
+    expect(trailingClause('x sucht, wo der Wind wohnt', 7)).toContain('wo');
+    expect(trailingClause('x sucht. Neuer Satz', 7)).toBe('');
+  });
+
+  it('macht aus dem Ziel einen Titelteil im Nominativ', () => {
+    expect(goalObject('den Ort zu suchen, an dem der Wind anfängt'))
+      .toBe('der Ort, an dem der Wind anfängt');
+    expect(goalObject('einen Drachen zu bauen')).toBe('ein Drachen');
+    expect(goalObject('kein Ziel')).toBeNull();
   });
 });

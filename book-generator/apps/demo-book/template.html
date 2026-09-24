@@ -1,0 +1,333 @@
+<title>__TITLE_TEXT__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Petrona:ital,wght@0,400;0,600;0,700;1,400&family=Karla:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper:   #f2efe7;
+    --card:    #fbf9f4;
+    --ink:     #241f1b;
+    --ink-2:   #5d554c;
+    --ink-3:   #8d8478;
+    --rule:    #ddd6c8;
+    --accent:  #55682f;
+    --accent-soft: #e6ebd8;
+    --warn:    #8a5a14;
+    --warn-bg: #f6ecd8;
+    --stage:   #2a2723;
+    --f-display: 'Petrona', 'Iowan Old Style', Georgia, serif;
+    --f-ui: 'Karla', system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper:  #15130f;
+      --card:   #1d1a16;
+      --ink:    #ece6da;
+      --ink-2:  #a89f92;
+      --ink-3:  #7a7164;
+      --rule:   #302b24;
+      --accent: #a3b673;
+      --accent-soft: #232a18;
+      --warn:   #d9ad60;
+      --warn-bg:#2a2314;
+      --stage:  #0d0c0a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper:  #15130f;
+    --card:   #1d1a16;
+    --ink:    #ece6da;
+    --ink-2:  #a89f92;
+    --ink-3:  #7a7164;
+    --rule:   #302b24;
+    --accent: #a3b673;
+    --accent-soft: #232a18;
+    --warn:   #d9ad60;
+    --warn-bg:#2a2314;
+    --stage:  #0d0c0a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--f-ui); font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin-inline: auto; padding-inline: 20px; padding-block: 0 64px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ── Titelei ──────────────────────────────────────────── */
+  header { padding-block: 44px 8px; text-align: center; }
+  .kicker {
+    font-size: 11.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 700; font-style: italic;
+    font-size: clamp(34px, 6.5vw, 62px); line-height: 1.02; margin: 0 0 12px;
+    letter-spacing: -.015em; text-wrap: balance;
+  }
+  .premise {
+    font-family: var(--f-display); font-size: clamp(17px, 2.4vw, 21px);
+    color: var(--ink-2); margin: 0 auto; max-width: 34ch; text-wrap: balance;
+  }
+  .byline {
+    margin-top: 18px; font-size: 13px; color: var(--ink-3);
+    letter-spacing: .04em;
+  }
+
+  .notice {
+    display: flex; gap: 11px; align-items: flex-start; text-align: left;
+    max-width: 640px; margin: 26px auto 0; padding: 13px 15px;
+    background: var(--warn-bg); border-left: 3px solid var(--warn);
+    border-radius: 0 8px 8px 0; font-size: 14px;
+  }
+  .notice svg { flex: none; margin-top: 3px; color: var(--warn); }
+  .notice b { font-weight: 600; }
+
+  /* ── Bühne ────────────────────────────────────────────── */
+  .stage {
+    margin-top: 32px; background: var(--stage);
+    border-radius: 14px; padding: clamp(12px, 2.5vw, 26px);
+  }
+  .spread { margin: 0; }
+  .spread svg {
+    display: block; width: 100%; height: auto; border-radius: 6px;
+    box-shadow: 0 10px 40px -18px rgb(0 0 0 / .8);
+  }
+  .spread figcaption {
+    display: flex; gap: 12px; align-items: baseline; justify-content: center;
+    margin-top: 14px; color: #b9b1a4; font-size: 13px; flex-wrap: wrap;
+  }
+  .pages { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+  .beat { font-family: var(--f-display); font-style: italic; font-size: 15px; color: #ddd5c6; }
+
+  .controls {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin-top: 22px;
+  }
+  button {
+    font: inherit; font-family: var(--f-ui); font-size: 14.5px; font-weight: 500;
+    cursor: pointer; border-radius: 8px; padding: 9px 16px;
+    background: var(--card); color: var(--ink); border: 1px solid var(--rule);
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity: .38; cursor: default; }
+  button:focus-visible, .thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .counter {
+    font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink-2);
+    min-width: 122px; text-align: center;
+  }
+  .hint { text-align: center; margin-top: 10px; font-size: 12.5px; color: var(--ink-3); }
+
+  /* ── Alle Seiten ──────────────────────────────────────── */
+  h2 {
+    font-family: var(--f-display); font-weight: 600; font-size: 22px;
+    margin: 44px 0 4px;
+  }
+  .sub { margin: 0 0 18px; color: var(--ink-2); font-size: 14.5px; }
+
+  .thumbs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+  }
+  .thumb {
+    padding: 0; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;
+    background: var(--card); display: block; position: relative; line-height: 0;
+  }
+  .thumb svg { width: 100%; height: auto; display: block; }
+  .thumb-label {
+    position: absolute; left: 7px; bottom: 6px;
+    background: rgb(0 0 0 / .55); color: #fff; font-size: 10.5px;
+    padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+  }
+  .thumb[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+
+  /* ── Hinter dem Buch ──────────────────────────────────── */
+  .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 18px; }
+  .panel {
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 18px;
+  }
+  .panel h3 {
+    font-family: var(--f-display); font-size: 17px; font-weight: 600; margin: 0 0 10px;
+  }
+  .panel p { margin: 0 0 10px; font-size: 14px; color: var(--ink-2); }
+  .panel p:last-child { margin-bottom: 0; }
+  .char { display: flex; gap: 10px; margin-bottom: 12px; }
+  .char:last-child { margin-bottom: 0; }
+  .swatch { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgb(0 0 0 / .14); }
+  .char strong { font-size: 14.5px; }
+  .char p { font-size: 13px; margin: 2px 0 0; line-height: 1.45; }
+
+  dl.facts { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; }
+  dl.facts dt { color: var(--ink-3); }
+  dl.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--accent); font-weight: 600; }
+
+  .quote {
+    font-family: var(--f-display); font-style: italic; font-size: 16px;
+    color: var(--ink); border-left: 3px solid var(--accent-soft);
+    padding-left: 13px; margin: 0;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+    background: var(--accent-soft); padding: 1px 5px; border-radius: 4px;
+  }
+
+  footer {
+    margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule);
+    font-size: 13.5px; color: var(--ink-3);
+  }
+  footer p { margin: 0 0 8px; max-width: 74ch; }
+
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Demo-Bilderbuch · __PAGE_COUNT__ Seiten</p>
+    <h1>__TITLE_TEXT__</h1>
+    <p class="premise">__PREMISE__</p>
+    <p class="byline">Erzeugt aus einem Satz · Lesestufe __AGE__ · __SPREAD_COUNT__ Doppelseiten</p>
+
+    <div class="notice">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="10" cy="10" r="8"/><path d="M10 6.4v4.3M10 13.5v.2"/>
+      </svg>
+      <div>
+        <b>Die Bilder sind Platzhalter, keine Illustrationen.</b>
+        Sie zeigen Layout, Bildausschnitt, Textfluss und die Farbidentität jeder Figur —
+        das, was sich ohne Bildmodell schon prüfen lässt. Auch der Text stammt aus einem
+        regelbasierten Demo-Generator, nicht aus einem Sprachmodell.
+      </div>
+    </div>
+  </header>
+
+  <div class="stage">
+    __SPREADS__
+  </div>
+
+  <div class="controls">
+    <button id="prev" type="button">← Zurück</button>
+    <span class="counter" id="counter">Doppelseite 1 von __SPREAD_COUNT__</span>
+    <button id="next" type="button">Weiter →</button>
+  </div>
+  <p class="hint">Mit den Pfeiltasten blättern</p>
+
+  <h2>Alle Doppelseiten</h2>
+  <p class="sub">Seite 1 ist Schmutztitel, 2–3 die Titeldoppelseite, 32 das Impressum — bleiben __SPREAD_COUNT__ für die Geschichte.</p>
+  <div class="thumbs" id="thumbs">
+    __THUMBS__
+  </div>
+
+  <h2>Hinter dem Buch</h2>
+  <p class="sub">Was das System aus einem Satz gemacht hat.</p>
+
+  <div class="panels">
+    <section class="panel">
+      <h3>Der Satz</h3>
+      <p class="quote">__PROMPT__</p>
+      <p style="margin-top:12px">Daraus gelesen: Figur, Gattung, Begleitung und Ziel. Alles andere —
+        Seitenplan, Beats, Layouts, Bildausschnitte — folgt aus Regeln.</p>
+    </section>
+
+    <section class="panel">
+      <h3>Figurenblätter</h3>
+      <div class="char">
+        <span class="swatch" style="background:hsl(__HERO_HUE__ 62% 58%)" aria-hidden="true"></span>
+        <div><strong>__HERO__</strong><p>__HERO_DESC__</p></div>
+      </div>
+      <div class="char">
+        <span class="swatch" style="background:hsl(__COMPANION_HUE__ 62% 58%)" aria-hidden="true"></span>
+        <div><strong>__COMPANION__</strong><p>__COMPANION_DESC__</p></div>
+      </div>
+      <p style="margin-top:12px">Diese Beschreibung geht wörtlich in jeden Bildprompt. Sie wird
+        einmal erzeugt und danach eingefroren — sonst sieht die Figur auf jeder Seite anders aus.</p>
+    </section>
+
+    <section class="panel">
+      <h3>Prüfung</h3>
+      <dl class="facts">
+        <dt>Druckbogen</dt><dd class="ok">__OK__</dd>
+        <dt>Doppelseiten</dt><dd>__SPREAD_COUNT__</dd>
+        <dt>Wörter</dt><dd>__WORDS__ · Ø __AVG__ je Seite</dd>
+        <dt>Lesestufe</dt><dd>__AGE__ Jahre</dd>
+        <dt>Layouts</dt><dd>__LAYOUTS__ verschiedene</dd>
+        <dt>Befunde</dt><dd>__ISSUES__</dd>
+      </dl>
+      <p style="margin-top:12px">Geprüft werden Seitenzahlen gegen den Druckbogen, Wort- und
+        Satzlänge gegen die Lesestufe, Figuren gegen ihre Blätter, der Layout-Rhythmus über das
+        ganze Buch — und ob der Text nur nacherzählt, was das Bild ohnehin zeigt.</p>
+    </section>
+
+    <section class="panel">
+      <h3>Der Refrain</h3>
+      <p class="quote">__REFRAIN__</p>
+      <p style="margin-top:12px">Ein wiederkehrender Satz ist für Dreijährige das stärkste
+        Einzelmittel — Kinder warten darauf und sprechen ihn mit. Er trägt erst ab drei
+        Wiederholungen; darunter meldet die Prüfung <code>pb_refrain_underused</code>.</p>
+    </section>
+  </div>
+
+  <footer>
+    <p>
+      Erzeugt vom Bilderbuch-Service: ein Prompt hinein, ein geprüftes Buch heraus.
+      Die Doppelseiten wurden zur Bauzeit gerendert und in diese Seite eingebettet.
+    </p>
+    <p>
+      Mit einem echten Sprachmodell entsteht die Geschichte aus dem Satz statt aus Vorlagen;
+      mit einem Bildmodell werden aus den Bildprompts Illustrationen. Beides ist je ein
+      Adapter — der Seitenplan, die Prüfungen und die Prompts bleiben gleich.
+    </p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var spreads = Array.prototype.slice.call(document.querySelectorAll('.spread'));
+    var thumbs = Array.prototype.slice.call(document.querySelectorAll('.thumb'));
+    var prev = document.getElementById('prev');
+    var next = document.getElementById('next');
+    var counter = document.getElementById('counter');
+    var current = 1;
+
+    function show(n) {
+      current = Math.min(Math.max(n, 1), spreads.length);
+      spreads.forEach(function (el) {
+        el.hidden = Number(el.dataset.index) !== current;
+      });
+      thumbs.forEach(function (el) {
+        el.setAttribute('aria-current', String(Number(el.dataset.goto) === current));
+      });
+      counter.textContent = 'Doppelseite ' + current + ' von ' + spreads.length;
+      prev.disabled = current === 1;
+      next.disabled = current === spreads.length;
+    }
+
+    prev.addEventListener('click', function () { show(current - 1); });
+    next.addEventListener('click', function () { show(current + 1); });
+
+    document.getElementById('thumbs').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-goto]');
+      if (!btn) return;
+      show(Number(btn.dataset.goto));
+      document.querySelector('.stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
+    });
+
+    show(1);
+  })();
+</script>

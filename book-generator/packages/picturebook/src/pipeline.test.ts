@@ -242,3 +242,29 @@ describe('Lesestufen sind nicht ineinander geschachtelt', () => {
     expect(asOlder.issues.map((i) => i.code)).toContain('pb_text_too_short');
   });
 });
+
+describe('Platzhalter: mehrere SVGs in einem Dokument', () => {
+  it('vergibt je Doppelseite eigene IDs', async () => {
+    // Werden mehrere SVGs in dasselbe HTML eingebettet, löst url(#sky) sonst
+    // immer auf die erste Definition auf — alle Seiten bekämen die Farben der
+    // ersten. Bei der Vorschau fiel das nicht auf, weil sie data-URIs nutzt.
+    const r = await createPictureBook({ prompt: PROMPT }, demo());
+    const ids = r.plan.spreads.map((s) => {
+      const svg = renderSpreadPlaceholder(s, r.plan);
+      return /id="sky-([a-z0-9]+)"/.exec(svg)?.[1];
+    });
+    expect(ids.every(Boolean)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('verweist nur auf eigene IDs', async () => {
+    const r = await createPictureBook({ prompt: PROMPT }, demo());
+    for (const s of r.plan.spreads) {
+      const svg = renderSpreadPlaceholder(s, r.plan);
+      const uid = /id="sky-([a-z0-9]+)"/.exec(svg)?.[1];
+      for (const ref of svg.matchAll(/url\(#([a-z-]+)-([a-z0-9]+)\)/g)) {
+        expect(ref[2]).toBe(uid);
+      }
+    }
+  });
+});

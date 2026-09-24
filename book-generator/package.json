@@ -19,7 +19,8 @@
     "clean": "tsc --build --clean",
     "serve": "node apps/server/build.mjs && node apps/server/dist/server.mjs",
     "build:server": "node apps/server/build.mjs",
-    "build:preview": "node apps/preview/build.mjs"
+    "build:preview": "node apps/preview/build.mjs",
+    "build:demo": "node apps/demo-book/build.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

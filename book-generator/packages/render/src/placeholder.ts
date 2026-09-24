@@ -143,22 +143,27 @@ export function renderSpreadPlaceholder(
   const p: string[] = [];
   const horizon = reg.image.y + reg.image.h * (0.58 + r() * 0.12);
 
+  // IDs muessen je Doppelseite eindeutig sein. Werden mehrere SVGs in dasselbe
+  // Dokument eingebettet, loest url(#sky) sonst immer auf die erste Definition
+  // auf — und alle Seiten bekommen die Verlaeufe der ersten.
+  const uid = `s${spread.seed.toString(36)}`;
+
   p.push(`<defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="sky-${uid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${skyTop}"/><stop offset="100%" stop-color="${skyBottom}"/>
     </linearGradient>
-    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="ground-${uid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="${groundA}"/><stop offset="100%" stop-color="${groundB}"/>
     </linearGradient>
-    <clipPath id="frame"><rect x="${reg.image.x}" y="${reg.image.y}" width="${reg.image.w}" height="${reg.image.h}" rx="${spread.layout === 'full_bleed' ? 0 : 14}"/></clipPath>
+    <clipPath id="frame-${uid}"><rect x="${reg.image.x}" y="${reg.image.y}" width="${reg.image.w}" height="${reg.image.h}" rx="${spread.layout === 'full_bleed' ? 0 : 14}"/></clipPath>
   </defs>`);
 
   // Papier
   p.push(`<rect width="${SPREAD_WIDTH}" height="${SPREAD_HEIGHT}" fill="${night ? '#0e1218' : '#fbfaf7'}"/>`);
 
   // ── Bildbereich ──────────────────────────────────────────────────────────
-  p.push(`<g clip-path="url(#frame)">`);
-  p.push(`<rect x="${reg.image.x}" y="${reg.image.y}" width="${reg.image.w}" height="${reg.image.h}" fill="url(#sky)"/>`);
+  p.push(`<g clip-path="url(#frame-${uid})">`);
+  p.push(`<rect x="${reg.image.x}" y="${reg.image.y}" width="${reg.image.w}" height="${reg.image.h}" fill="url(#sky-${uid})"/>`);
 
   // Himmelskoerper
   const sunX = reg.image.x + reg.image.w * (0.14 + r() * 0.7);
@@ -192,7 +197,7 @@ export function renderSpreadPlaceholder(
 
   // Boden
   p.push(`<rect x="${reg.image.x}" y="${f(horizon)}" width="${reg.image.w}" height="${
-    f(reg.image.y + reg.image.h - horizon)}" fill="url(#ground)"/>`);
+    f(reg.image.y + reg.image.h - horizon)}" fill="url(#ground-${uid})"/>`);
 
   // Vordergrund-Formen
   const shapes = 2 + Math.floor(r() * 4);

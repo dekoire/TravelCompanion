@@ -81,10 +81,15 @@ export function parsePrompt(raw: string): ParsedPrompt {
   const direct = new RegExp(
     `\\b(${GOAL_VERBS.join('|')})\\s+(.{3,90}?)(?:[.,;!?]|$)`, 'i').exec(text);
   if (rel?.[1] && rel[2]) {
-    goal = `${trimArticleTail(stripLeadingWith(rel[1]))} zu ${infinitive(rel[2])}`;
+    // Deutsch ist im Nebensatz verbletzt: das Objekt steht VOR dem Verb, ein
+    // nachgestellter Relativsatz DAHINTER. Ohne ihn verliert "den Ort, an dem
+    // der Wind anfaengt" genau den Teil, der die Geschichte ausmacht.
+    const tail = trailingClause(text, rel.index + rel[0].length);
+    goal = `${trimArticleTail(stripLeadingWith(rel[1]))} zu ${infinitive(rel[2])}${tail}`;
     derived.goal = 'prompt';
   } else if (direct?.[1] && direct[2]) {
-    goal = `${trimArticleTail(stripLeadingWith(direct[2]))} zu ${infinitive(direct[1])}`;
+    const tail = trailingClause(text, direct.index + direct[0].length);
+    goal = `${trimArticleTail(stripLeadingWith(direct[2]))} zu ${infinitive(direct[1])}${tail}`;
     derived.goal = 'prompt';
   }
 
@@ -132,6 +137,33 @@ export function parsePrompt(raw: string): ParsedPrompt {
   }
 
   return { heroName, heroKind, companionName, companionKind, place, goal, derived };
+}
+
+/** Nimmt einen nachgestellten Relativsatz mit: ", an dem der Wind anfaengt". */
+export function trailingClause(text: string, from: number): string {
+  const rest = text.slice(from);
+  const m = /^\s*(,\s*(?:an dem|in dem|auf dem|bei dem|aus dem|wo|der|die|das|den|dem)\b[^.!?;]{2,90})/i
+    .exec(rest);
+  return m?.[1] ? m[1].replace(/\s+$/, '') : '';
+}
+
+/** "den Ort zu suchen, an dem …" -> "der Ort, an dem …" — fuer Titel. */
+export function goalObject(goal: string): string | null {
+  const m = /^(.+?)\s+zu\s+[^\s,]+(.*)$/.exec(goal.trim());
+  if (!m?.[1]) return null;
+  return nominative(m[1]) + (m[2] ?? '');
+}
+
+const CASE_MAP: Record<string, string> = {
+  den: 'der', dem: 'der', des: 'der',
+  einen: 'ein', einem: 'ein', eines: 'ein', einer: 'eine',
+};
+
+function nominative(phrase: string): string {
+  const [first, ...rest] = phrase.trim().split(/\s+/);
+  if (!first) return phrase;
+  const mapped = CASE_MAP[first.toLowerCase()];
+  return [mapped ?? first, ...rest].join(' ');
 }
 
 const isGoalVerb = (s: string): boolean =>

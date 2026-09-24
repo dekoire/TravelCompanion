@@ -1,6 +1,6 @@
 import { READING_RULES, type ReadingLevel } from '@abg/domain';
 import type { CompletionRequest, TextGenerator } from './generator';
-import { parsePrompt } from './prompt';
+import { goalObject, parsePrompt } from './prompt';
 
 /**
  * Demo-Generator: erzeugt einen Bilderbuch-Entwurf OHNE Sprachmodell.
@@ -335,7 +335,7 @@ export function buildDemoDraft(input: DemoBookInput): unknown {
   });
 
   return {
-    title: titleFrom(input.idea, hero),
+    title: titleFrom(input.idea, hero, goal),
     premise: `${hero} macht sich auf, ${goal}.`,
     refrain,
     characters,
@@ -353,11 +353,15 @@ export function buildDemoDraft(input: DemoBookInput): unknown {
   };
 }
 
-function titleFrom(idea: string, hero: string): string {
-  const cleaned = idea.trim().replace(/\s+/g, ' ');
-  if (cleaned.length >= 8 && cleaned.length <= 60) {
-    return cleaned.replace(/[.!?]+$/, '');
-  }
+function titleFrom(idea: string, hero: string, goal: string): string {
+  const cleaned = idea.trim().replace(/\s+/g, ' ').replace(/[.!?]+$/, '');
+  if (cleaned.length >= 8 && cleaned.length <= 60) return cleaned;
+
+  // Aus "den Ort zu suchen, an dem der Wind anfaengt" wird
+  // "Nuri und der Ort, an dem der Wind anfaengt".
+  const obj = goalObject(goal);
+  if (obj && obj.length >= 6 && obj.length <= 70) return `${hero} und ${obj}`;
+
   return `${hero} und das, was noch fehlt`;
 }
 
