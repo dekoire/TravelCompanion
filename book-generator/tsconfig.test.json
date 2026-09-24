@@ -5,13 +5,27 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@abg/schemas": ["./packages/schemas/src/index.ts"],
-      "@abg/domain": ["./packages/domain/src/index.ts"],
-      "@abg/llm": ["./packages/llm/src/index.ts"]
+      "@abg/schemas": [
+        "./packages/schemas/src/index.ts"
+      ],
+      "@abg/domain": [
+        "./packages/domain/src/index.ts"
+      ],
+      "@abg/llm": [
+        "./packages/llm/src/index.ts"
+      ],
+      "@abg/render": [
+        "./packages/render/src/index.ts"
+      ]
     },
     "baseUrl": "."
   },
-  "include": ["packages/*/src/**/*.ts", "vitest.config.ts"]
+  "include": [
+    "packages/*/src/**/*.ts",
+    "vitest.config.ts"
+  ]
 }

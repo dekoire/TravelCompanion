@@ -1,0 +1,527 @@
+<title>Doppelseiten-Andruck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper:    #f1f3ee;
+    --surface:  #fbfcf9;
+    --sunk:     #e8ebe3;
+    --ink:      #17232e;
+    --ink-soft: #566472;
+    --ink-faint:#8a94a0;
+    --rule:     #d7dbd1;
+    --press:    #1d6b67;
+    --press-on: #ffffff;
+    --stop:     #a5261d;
+    --stop-bg:  #f7e6e4;
+    --caution:  #8c5c0d;
+    --caution-bg:#f7eed9;
+    --note:     #4a5b6b;
+    --note-bg:  #e7ecef;
+    --ok:       #1d6b67;
+    --ok-bg:    #dceceb;
+    --shadow:   0 1px 2px rgb(23 35 46 / .06), 0 8px 24px -16px rgb(23 35 46 / .3);
+
+    --f-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --f-body: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+    --f-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper:    #0f151b;
+      --surface:  #161e26;
+      --sunk:     #101821;
+      --ink:      #e4eaef;
+      --ink-soft: #9fadb9;
+      --ink-faint:#6b7885;
+      --rule:     #27323d;
+      --press:    #57b7b0;
+      --press-on: #07211f;
+      --stop:     #e98b82;
+      --stop-bg:  #2e1a18;
+      --caution:  #dcae5c;
+      --caution-bg:#2c2415;
+      --note:     #9fb0bf;
+      --note-bg:  #1b242d;
+      --ok:       #57b7b0;
+      --ok-bg:    #12282a;
+      --shadow:   0 1px 2px rgb(0 0 0 / .4), 0 10px 30px -18px rgb(0 0 0 / .8);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper:    #0f151b;
+    --surface:  #161e26;
+    --sunk:     #101821;
+    --ink:      #e4eaef;
+    --ink-soft: #9fadb9;
+    --ink-faint:#6b7885;
+    --rule:     #27323d;
+    --press:    #57b7b0;
+    --press-on: #07211f;
+    --stop:     #e98b82;
+    --stop-bg:  #2e1a18;
+    --caution:  #dcae5c;
+    --caution-bg:#2c2415;
+    --note:     #9fb0bf;
+    --note-bg:  #1b242d;
+    --ok:       #57b7b0;
+    --ok-bg:    #12282a;
+    --shadow:   0 1px 2px rgb(0 0 0 / .4), 0 10px 30px -18px rgb(0 0 0 / .8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1240px; margin-inline: auto; padding-inline: 20px; padding-block: 0 72px; }
+
+  /* ── Kopf ─────────────────────────────────────────────── */
+  header.top { padding-block: 40px 20px; }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--press); margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(30px, 5vw, 46px); line-height: 1.08;
+    margin: 0 0 10px; text-wrap: balance; letter-spacing: -.01em;
+  }
+  .lede { margin: 0; color: var(--ink-soft); max-width: 62ch; font-size: 17px; }
+
+  .demo-note {
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-top: 22px; padding: 14px 16px;
+    background: var(--caution-bg); border-left: 3px solid var(--caution);
+    border-radius: 0 8px 8px 0; font-size: 14.5px; color: var(--ink);
+  }
+  .demo-note b { font-weight: 600; }
+  .demo-note svg { flex: none; margin-top: 2px; color: var(--caution); }
+
+  /* ── Flächen ──────────────────────────────────────────── */
+  section.panel {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 22px; margin-top: 26px; box-shadow: var(--shadow);
+  }
+  h2 {
+    font-family: var(--f-display); font-weight: 600; font-size: 21px;
+    margin: 0 0 4px; letter-spacing: -.005em;
+  }
+  .sub { margin: 0 0 18px; color: var(--ink-soft); font-size: 14.5px; }
+
+  /* ── Formular ─────────────────────────────────────────── */
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.wide { grid-column: 1 / -1; }
+  label {
+    font-size: 12px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  input[type=text], select, textarea {
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--rule);
+    border-radius: 7px; padding: 9px 11px; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 78px; line-height: 1.5; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible,
+  button:focus-visible, .proof:focus-visible {
+    outline: 2px solid var(--press); outline-offset: 2px;
+  }
+  .hint { font-size: 12.5px; color: var(--ink-faint); }
+
+  .hue-row { display: flex; align-items: center; gap: 12px; }
+  input[type=range] { flex: 1; accent-color: var(--press); }
+  #hueOut {
+    font-family: var(--f-mono); font-size: 12px; color: var(--ink);
+    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--rule);
+    min-width: 54px; text-align: center;
+  }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
+  button {
+    font: inherit; font-weight: 600; font-size: 15px; cursor: pointer;
+    border-radius: 7px; padding: 10px 18px; border: 1px solid transparent;
+    background: var(--press); color: var(--press-on);
+  }
+  button:hover { filter: brightness(1.06); }
+  button:disabled { opacity: .6; cursor: progress; }
+  button.ghost { background: transparent; color: var(--ink-soft); border-color: var(--rule); }
+
+  /* ── Buchkopf ─────────────────────────────────────────── */
+  .book-head { margin-top: 34px; padding-top: 26px; border-top: 2px solid var(--ink); }
+  #bookTitle {
+    font-family: var(--f-display); font-weight: 700;
+    font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  #bookPremise { margin: 0 0 18px; color: var(--ink-soft); font-size: 16.5px; max-width: 60ch; }
+
+  .verdict { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .chip {
+    font-size: 12.5px; font-weight: 600; padding: 4px 11px; border-radius: 999px;
+    letter-spacing: .02em;
+  }
+  .chip-ok   { background: var(--ok-bg); color: var(--ok); }
+  .chip-stop { background: var(--stop-bg); color: var(--stop); }
+  .chip-warn { background: var(--caution-bg); color: var(--caution); }
+  .chip-note { background: var(--note-bg); color: var(--note); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    border-radius: 9px; overflow: hidden; margin: 0 0 4px;
+  }
+  .stat { background: var(--surface); padding: 12px 14px; }
+  .stat dt {
+    font-size: 11.5px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .stat dd {
+    margin: 3px 0 1px; font-family: var(--f-display); font-weight: 600;
+    font-size: 24px; line-height: 1.1; font-variant-numeric: tabular-nums;
+  }
+  .stat p { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+  /* ── Arbeitsfläche ────────────────────────────────────── */
+  .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 26px; margin-top: 26px; }
+  @media (max-width: 900px) { .workspace { grid-template-columns: minmax(0, 1fr); } }
+
+  aside { display: flex; flex-direction: column; gap: 18px; }
+  @media (min-width: 901px) {
+    aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; max-height: calc(100vh - 40px); overflow-y: auto; }
+  }
+  aside section.panel { margin-top: 0; }
+
+  /* ── Andruckbogen ─────────────────────────────────────── */
+  #sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .proof {
+    margin: 0; background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 9px; overflow: hidden; cursor: pointer;
+    transition: border-color .12s, transform .12s;
+  }
+  .proof:hover { border-color: var(--press); transform: translateY(-1px); }
+  .proof.is-selected { border-color: var(--press); box-shadow: 0 0 0 2px var(--press) inset; }
+  .proof img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; background: var(--sunk); }
+  .proof figcaption {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 11px; border-top: 1px solid var(--rule); font-size: 13px;
+  }
+  .proof-no { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-faint); flex: none; }
+  .proof-beat { color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-left: auto; }
+  .dot-block { background: var(--stop); } .dot-warn { background: var(--caution); }
+  .dot-info { background: var(--note); }
+
+  /* ── Befunde ──────────────────────────────────────────── */
+  .issue {
+    border-left: 3px solid var(--note); background: var(--note-bg);
+    padding: 10px 12px; border-radius: 0 7px 7px 0; margin-bottom: 9px; font-size: 14px;
+  }
+  .issue[data-goto] { cursor: pointer; }
+  .issue[data-goto]:hover { filter: brightness(.97); }
+  .issue-block { border-color: var(--stop); background: var(--stop-bg); }
+  .issue-warn  { border-color: var(--caution); background: var(--caution-bg); }
+  .issue-head { display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px; }
+  .issue-where { font-weight: 600; font-size: 12.5px; }
+  .issue code { font-family: var(--f-mono); font-size: 11px; color: var(--ink-faint); }
+  .issue p { margin: 0; }
+  .issue-hint { margin-top: 5px !important; color: var(--ink-soft); font-size: 13px; }
+  .empty { color: var(--ink-faint); font-size: 14px; margin: 0; }
+
+  /* ── Figuren ──────────────────────────────────────────── */
+  #characters { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .char { display: flex; gap: 11px; }
+  .swatch { flex: none; width: 26px; height: 26px; border-radius: 7px; border: 1px solid rgb(0 0 0 / .12); }
+  .swatch-sm { width: 14px; height: 14px; border-radius: 4px; }
+  .char-role { font-size: 12px; color: var(--ink-faint); margin-left: 6px; }
+  .char-desc { margin: 3px 0 0; font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+
+  /* ── Editor ───────────────────────────────────────────── */
+  #editor { margin-top: 20px; }
+  .editor-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+  .editor-grid .fields { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  @media (max-width: 760px) { .editor-grid { grid-template-columns: minmax(0, 1fr); } }
+  #editorPreview {
+    width: 100%; height: auto; aspect-ratio: 2 / 1; display: block;
+    border: 1px solid var(--rule); border-radius: 9px; background: var(--sunk);
+  }
+  #editorMeter { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+  .meter {
+    font-family: var(--f-mono); font-size: 11.5px; padding: 3px 9px; border-radius: 5px;
+  }
+  .meter-ok { background: var(--ok-bg); color: var(--ok); }
+  .meter-warn { background: var(--caution-bg); color: var(--caution); }
+  .meter-stop { background: var(--stop-bg); color: var(--stop); }
+  .meter-quiet { background: var(--sunk); color: var(--ink-faint); }
+
+  .subhead {
+    font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 18px 0 9px; padding-bottom: 5px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .subhead:first-child { margin-top: 0; }
+  .check { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; font-size: 14px;
+           text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--ink); }
+  .check input { accent-color: var(--press); }
+
+  #promptOut {
+    font-family: var(--f-mono); font-size: 12px; line-height: 1.6;
+    background: var(--sunk); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 12px; margin: 0; white-space: pre-wrap; word-break: break-word;
+    max-height: 260px; overflow-y: auto; color: var(--ink-soft);
+  }
+  .prompt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .prompt-head button { font-size: 13px; padding: 5px 11px; }
+
+  footer {
+    margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--rule);
+    font-size: 13.5px; color: var(--ink-faint);
+  }
+  footer p { margin: 0 0 6px; max-width: 72ch; }
+  footer code { font-family: var(--f-mono); font-size: 12.5px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">AI Book Generator · Bilderbuch-Track</p>
+    <h1>Doppelseiten-Andruck</h1>
+    <p class="lede">
+      Ein Bilderbuch entsteht in Doppelseiten, nicht in Kapiteln: Das Bild ist der Inhalt,
+      der Text die Bildunterschrift. Hier wird der Satz gesetzt, gegen Druckbogen und
+      Lesestufe geprüft und Seite für Seite überarbeitet.
+    </p>
+
+    <div class="demo-note">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="10" cy="10" r="8"/><path d="M10 6.5v4.2M10 13.6v.2"/>
+      </svg>
+      <div>
+        <b>Die Bilder sind Platzhalter, keine KI-Illustrationen.</b>
+        Sie zeigen Layout, Bildausschnitt, Textfluss im Satzspiegel und die Farbidentität
+        jeder Figur. Auch die Texte stammen aus einem Demo-Generator, nicht aus einem Modell —
+        die Pipeline, die Prüfungen und die Bildprompts sind dagegen echt.
+      </div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>Buch anlegen</h2>
+    <p class="sub">Aus diesen Angaben werden Seitenplan, Figurenblätter und Doppelseiten gesetzt.</p>
+
+    <div class="fields">
+      <div class="field wide">
+        <label for="idea">Idee</label>
+        <textarea id="idea">Ein Kind sucht den Ort, an dem der Wind anfängt</textarea>
+        <span class="hint">Wird als Titel und Prämisse verwendet.</span>
+      </div>
+
+      <div class="field">
+        <label for="heroName">Hauptfigur</label>
+        <input type="text" id="heroName" value="Mika">
+      </div>
+      <div class="field">
+        <label for="heroKind">Was ist sie?</label>
+        <input type="text" id="heroKind" value="ein Kind">
+        <span class="hint">Geht in den Bildbeschreiber ein.</span>
+      </div>
+      <div class="field">
+        <label for="companionName">Begleitung</label>
+        <input type="text" id="companionName" value="Nuri">
+      </div>
+      <div class="field">
+        <label for="companionKind">Was ist sie?</label>
+        <input type="text" id="companionKind" value="ein kleiner Fuchs">
+      </div>
+
+      <div class="field">
+        <label for="place">Ort</label>
+        <input type="text" id="place" value="am Rand des Dorfes">
+      </div>
+      <div class="field">
+        <label for="goal">Ziel der Figur</label>
+        <input type="text" id="goal" value="den Ort zu finden, an dem der Wind anfängt">
+      </div>
+
+      <div class="field">
+        <label for="targetAge">Lesestufe</label>
+        <select id="targetAge">
+          <option value="6+" selected>3–5 Jahre · Vorlesebuch</option>
+          <option value="9+">5–7 Jahre · Erstlesealter</option>
+          <option value="12+">7–9 Jahre · selbst lesend</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pageCount">Umfang</label>
+        <select id="pageCount">
+          <option value="24">24 Seiten · 10 Doppelseiten</option>
+          <option value="32" selected>32 Seiten · 14 Doppelseiten</option>
+          <option value="40">40 Seiten · 18 Doppelseiten</option>
+          <option value="48">48 Seiten · 22 Doppelseiten</option>
+        </select>
+        <span class="hint">Nur Vielfache von 8 sind druckbar.</span>
+      </div>
+      <div class="field">
+        <label for="medium">Technik</label>
+        <select id="medium">
+          <option value="watercolor" selected>Aquarell</option>
+          <option value="cut_paper">Scherenschnitt-Collage</option>
+          <option value="gouache">Gouache</option>
+          <option value="crayon">Wachsmalkreide</option>
+          <option value="digital_soft">weiche digitale Malerei</option>
+          <option value="ink_wash">Tuschelavierung</option>
+          <option value="collage">Papiercollage</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="paletteHue">Farbwelt</label>
+        <div class="hue-row">
+          <input type="range" id="paletteHue" min="0" max="359" value="120">
+          <span id="hueOut">120°</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="generate">Bilderbuch setzen</button>
+      <button id="reset" class="ghost">Entwurf verwerfen</button>
+    </div>
+  </section>
+
+  <div id="book" hidden>
+    <div class="book-head">
+      <h2 id="bookTitle">—</h2>
+      <p id="bookPremise"></p>
+      <div class="verdict" id="verdict"></div>
+      <dl class="stats" id="stats"></dl>
+    </div>
+
+    <div class="workspace">
+      <main>
+        <section class="panel" style="margin-top:0">
+          <h2>Andruckbogen</h2>
+          <p class="sub">Jede Doppelseite mit ihren echten Seitenzahlen. Anklicken zum Überarbeiten.</p>
+          <div id="sheet"></div>
+        </section>
+
+        <section class="panel" id="editor" hidden>
+          <h2 id="editorTitle">Doppelseite</h2>
+          <p class="sub">Änderungen wirken sofort auf Vorschau und Prüfung.</p>
+
+          <div class="editor-grid">
+            <div>
+              <img id="editorPreview" alt="">
+              <div id="editorMeter"></div>
+
+              <p class="subhead">Bildprompt</p>
+              <div class="prompt-head">
+                <span class="hint">Aus Bild-Brief, Figurenblättern und Stilanker zusammengesetzt.</span>
+                <button id="copyPrompt" class="ghost">Prompt kopieren</button>
+              </div>
+              <pre id="promptOut"></pre>
+            </div>
+
+            <div>
+              <p class="subhead">Text auf dieser Doppelseite</p>
+              <div class="field">
+                <label for="f_text">Bildunterschrift</label>
+                <textarea id="f_text"></textarea>
+                <span class="hint">Sagt, was man nicht sieht: Gedanke, Ton, Zeit.</span>
+              </div>
+              <div class="field" style="margin-top:12px">
+                <label for="f_beat">Beat</label>
+                <input type="text" id="f_beat">
+              </div>
+
+              <p class="subhead">Bild-Brief</p>
+              <div class="fields">
+                <div class="field wide">
+                  <label for="f_subject">Wer oder was</label>
+                  <input type="text" id="f_subject">
+                </div>
+                <div class="field wide">
+                  <label for="f_action">Was passiert</label>
+                  <input type="text" id="f_action">
+                </div>
+                <div class="field wide">
+                  <label for="f_setting">Ort</label>
+                  <input type="text" id="f_setting">
+                </div>
+                <div class="field">
+                  <label for="f_mood">Stimmung</label>
+                  <input type="text" id="f_mood">
+                </div>
+                <div class="field">
+                  <label for="f_camera">Bildausschnitt</label>
+                  <select id="f_camera"></select>
+                </div>
+                <div class="field">
+                  <label for="f_time">Tageszeit</label>
+                  <select id="f_time"></select>
+                </div>
+                <div class="field">
+                  <label for="f_layout">Layout</label>
+                  <select id="f_layout"></select>
+                </div>
+                <div class="field">
+                  <label for="f_anchor">Textbereich</label>
+                  <select id="f_anchor"></select>
+                </div>
+              </div>
+
+              <p class="subhead">Figuren im Bild</p>
+              <div id="f_chars"></div>
+
+              <p class="subhead">Befunde dieser Doppelseite</p>
+              <div id="editorIssues"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <section class="panel">
+          <h2>Prüfbericht</h2>
+          <p class="sub">Druckbogen, Lesestufe, Figuren, Rhythmus.</p>
+          <div id="report"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Figurenblätter</h2>
+          <p class="sub">Diese Beschreibung geht wörtlich in jeden Bildprompt — so bleibt die Figur gleich.</p>
+          <ul id="characters"></ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      Die Prüfungen laufen ohne Modell: Seitenzahlen gegen den Druckbogen, Wort- und Satzlänge
+      gegen die Lesestufe, Figuren gegen ihre Blätter, Layout- und Bildausschnitt-Rhythmus über
+      das ganze Buch — und die Frage, ob der Text nur nacherzählt, was das Bild ohnehin zeigt.
+    </p>
+    <p>
+      Gebaut aus <code>@abg/schemas</code>, <code>@abg/domain</code>, <code>@abg/llm</code> und
+      <code>@abg/render</code>. Ein echter Bildanbieter ersetzt genau eine Funktion:
+      <code>renderSpreadPlaceholder</code>.
+    </p>
+  </footer>
+</div>
+
+<script src="app.js" defer></script>

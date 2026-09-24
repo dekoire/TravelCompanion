@@ -7,8 +7,9 @@ vollständige Bücher erzeugt — von der Kurzgeschichte (3.000 Wörter) bis zum
 (250.000+ Wörter), belletristisch **und** als Sachbuch, mit Cover, Metadaten, Export
 (EPUB/PDF/DOCX) und optionalem Hörbuch.
 
-> **Implementierungsstand:** M0 und M1 sind gebaut und getestet —
-> [`book-generator/`](../../book-generator/) (304 Tests, keine Modellkosten).
+> **Implementierungsstand:** M0, M1 und der Bilderbuch-Track sind gebaut und getestet —
+> [`book-generator/`](../../book-generator/) (395 Tests, keine Modellkosten).
+> Eine klickbare Vorschau mit Andruckbogen und Doppelseiten-Editor gibt es dazu.
 > Was fertig ist, steht in [book-generator/README.md](../../book-generator/README.md);
 > was als Nächstes kommt, in [21-roadmap.md](21-roadmap.md).
 
@@ -68,6 +69,7 @@ tatsächlich deterministisch, statt nur eine zweite LLM-Meinung zu prüfen.
 | [19-export-medien.md](19-export-medien.md) | EPUB/PDF/DOCX, Cover, Kapitelbilder, Hörbuch |
 | [20-qualitaet-tests.md](20-qualitaet-tests.md) | Evals, Testbücher, KPIs, Monitoring, Regression |
 | [21-roadmap.md](21-roadmap.md) | Umsetzungsreihenfolge, Meilensteine, Risiken, Aufwand |
+| [22-bilderbuch.md](22-bilderbuch.md) | Bilderbuch-Track: Doppelseite statt Kapitel, Druckbogen, Lesestufen, Figurenkonsistenz im Bild |
 
 ## Ordnerstruktur des Zielprojekts
 

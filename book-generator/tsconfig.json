@@ -1,8 +1,17 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/schemas" },
-    { "path": "./packages/domain" },
-    { "path": "./packages/llm" }
+    {
+      "path": "./packages/schemas"
+    },
+    {
+      "path": "./packages/domain"
+    },
+    {
+      "path": "./packages/llm"
+    },
+    {
+      "path": "./packages/render"
+    }
   ]
 }

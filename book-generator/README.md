@@ -1,15 +1,16 @@
 # AI Book Generator — Implementierung
 
 Umsetzung des Konzepts aus [`docs/ai-book-generator/`](../docs/ai-book-generator/).
-Stand: **M0 + M1** aus der [Roadmap](../docs/ai-book-generator/21-roadmap.md).
+Stand: **M0 + M1** aus der [Roadmap](../docs/ai-book-generator/21-roadmap.md),
+plus der vollständige **Bilderbuch-Track** ([22](../docs/ai-book-generator/22-bilderbuch.md)).
 
 ```bash
 npm install
-npm run check     # Typecheck (inkl. Tests) + 304 Tests
-npm test
+npm run check              # Typecheck (inkl. Tests) + 395 Tests
+node apps/preview/build.mjs  # klickbare Vorschau -> apps/preview/dist/
 ```
 
-Keine API-Schlüssel nötig: alles läuft gegen den Mock-Provider.
+Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Provider.
 
 ## Was fertig ist
 
@@ -17,6 +18,7 @@ Keine API-Schlüssel nötig: alles läuft gegen den Mock-Provider.
 |---|---|---|
 | **`@abg/schemas`** | Zod-Verträge: `BookSpec`, `WizardInput`, `ChapterCard`, `SceneCard`, `ChapterExtraction`, `Issue`, Moderations- und Verifikationsergebnisse. Alles `.strict()`. | [15](../docs/ai-book-generator/15-json-schemas.md) |
 | **`@abg/domain`** | I/O-freie Fachlogik: Wortzählung, Dialogmessung, Größenklassen, `deriveSpec`, `validateSpec`, Act-Skelett, Budget- und Kostenmodell, **Quote-Grounding**, Bedingungs-Parser, Phrasenstatistik, Ähnlichkeitsmaße, Idempotenz-Schlüssel. | [02](../docs/ai-book-generator/02-domaenenmodell.md), [03](../docs/ai-book-generator/03-bookspec.md), [10](../docs/ai-book-generator/10-extraktion.md), [18](../docs/ai-book-generator/18-kosten-budget.md) |
+| **`@abg/render`** | Deterministischer SVG-Platzhalter für Bilderbuch-Doppelseiten: Layout, Textfluss im Satzspiegel, Farbidentität je Figur. Ersetzt später ein echtes Bildmodell an genau einer Stelle. | [22](../docs/ai-book-generator/22-bilderbuch.md) |
 | **`@abg/llm`** | Provider-Gateway: Capability-Routing, Prompt-Assemblierung mit Cache-Grenze, Nutzertext-Neutralisierung, Retry-Politik, Truncation-Fortsetzung, Structured Output mit genau einem Repair-Call, Budgetwächter, Idempotenz-Speicher, Mock-Provider mit Fehlerinjektion. | [01](../docs/ai-book-generator/01-systemarchitektur.md), [09](../docs/ai-book-generator/09-context-builder.md), [13](../docs/ai-book-generator/13-prompting-sicherheit.md) |
 
 ## Die drei Kernstücke
@@ -113,7 +115,10 @@ new MockProvider({ scripts: {
 | `sanitize.test.ts` | 19 | Neutralisierung, Injection-Signale, Delimiter |
 | `gateway.test.ts` | 38 | Retry, Truncation, Idempotenz, Budget, Fallback |
 | `pipeline.test.ts` | 3 | Integration: Idee → geprüftes Kapitel |
-| **Summe** | **304** | |
+| `hash.test.ts` | 21 | SHA-256 gegen offizielle Vektoren und `node:crypto` |
+| `picturebook.test.ts` | 44 | Druckbogen, Lesestufen, Prompt-Komposition, alle Prüfungen |
+| `picturebook-pipeline.test.ts` | 26 | Integration Bilderbuch + Platzhalter-Renderer |
+| **Summe** | **395** | |
 
 ## Drei Stellen, an denen die Tests die Doku korrigiert haben
 
@@ -126,6 +131,30 @@ new MockProvider({ scripts: {
 3. **Gemischte Anführungszeichen.** Modelle liefern regelmäßig `„Text"` statt `„Text"`.
    Wer nur das exakte Paar sucht, misst den Dialoganteil als 0 und repariert anschließend
    das falsche Problem.
+4. **Lesestufen sind nicht geschachtelt.** Ein Test unterstellte, die strengere Stufe melde
+   immer mehr Befunde. Falsch: `early_reader` hat eine *höhere* Mindestwortzahl als
+   `pre_reader` — ein Text kann für Dreijährige richtig und für Sechsjährige zu dünn sein.
+5. **`node:crypto` in einem als plattformfrei deklarierten Paket.** Fiel erst auf, als
+   `@abg/domain` im Browser laufen sollte. Ersetzt durch eine eigene SHA-256-Implementierung,
+   geprüft gegen die offiziellen Testvektoren und gegen `node:crypto`.
+
+## Bilderbuch-Track
+
+Eigenes Modell, weil ein Bilderbuch kein Roman mit Bildern ist: Einheit ist die Doppelseite,
+das Bild ist der Inhalt, der Text die Bildunterschrift.
+
+* **Druckbogen-Mathematik** — nur 24/32/40/48 Seiten sind herstellbar; Seite 1 ist rechts,
+  also ist jede Doppelseite ein Paar (gerade, ungerade). 32 Seiten ergeben genau 14
+  Story-Doppelseiten.
+* **Lesestufen** — Wort- und Satzgrenzen je Alter, bewusst **nicht** ineinander geschachtelt:
+  eine höhere Stufe verschiebt Ober- *und* Untergrenze.
+* **Figurenkonsistenz** — der `visualDescriptor` wird einmal erzeugt, eingefroren und danach
+  wörtlich in jeden Bildprompt eingesetzt.
+* **Redundanzprüfung** — misst, ob der Text nur nacherzählt, was das Bild ohnehin zeigt.
+  Der häufigste Fehler in generierten Bilderbüchern, und deterministisch messbar.
+
+`node apps/preview/build.mjs` baut daraus eine klickbare Seite mit Andruckbogen,
+Doppelseiten-Editor und Live-Prüfung. Details: [apps/preview/README.md](apps/preview/README.md).
 
 ## Nächste Schritte (M2)
 

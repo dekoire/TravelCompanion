@@ -9,4 +9,7 @@ export * from './grounding';
 export * from './conditions';
 export * from './phrases';
 export * from './similarity';
+export * from './hash';
 export * from './idempotency';
+export * from './picturebook';
+export * from './picturebook-validate';

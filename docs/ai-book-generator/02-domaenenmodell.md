@@ -81,6 +81,10 @@ das System bestimmt daraus Klasse und Pipeline-Profil.
 Die Regel "mindestens 800 Wörter pro Kapitel" aus dem Ausgangskonzept gilt **nur** für
 Erwachsenen-/YA-Fiktion und wird für Kinderbücher durch obige Tabelle ersetzt.
 
+**`picture_book` ist zusätzlich ein eigener Track**, kein bloßer Umfangsbereich: Die Einheit
+ist die Doppelseite, die Seitenzahl folgt dem Druckbogen (24/32/40/48), und das Bild ist der
+Inhalt. Vollständig in [22-bilderbuch.md](22-bilderbuch.md).
+
 ### 3.2 Pipeline-Profile
 
 Welche Stufen laufen, hängt von der Klasse ab. Das verhindert, dass eine Kurzgeschichte

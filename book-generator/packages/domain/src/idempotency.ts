@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { sha256Hex } from './hash';
 import { stableStringify } from './derive';
 
 /**
@@ -8,7 +8,7 @@ import { stableStringify } from './derive';
  */
 
 export function sha256(input: string): string {
-  return createHash('sha256').update(input, 'utf8').digest('hex');
+  return sha256Hex(input);
 }
 
 export function hashObject(value: unknown): string {

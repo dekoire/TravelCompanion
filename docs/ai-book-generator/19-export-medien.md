@@ -90,6 +90,10 @@ Drei Varianten erzeugen, Nutzer wählt. Kosten sind gering im Verhältnis zur Wi
 
 ## 3. Kapitelbilder
 
+> **Gilt nicht für Bilderbücher.** Dieser Abschnitt behandelt Bilder als Ergänzung zu einem
+> fertigen Text. Im Bilderbuch ist das Bild der Inhalt und der Text die Bildunterschrift;
+> beide werden gemeinsam geplant, nicht nacheinander. Siehe [22-bilderbuch.md](22-bilderbuch.md).
+
 - Erst **nach** finaler Kapitelversion.
 - Ein Bild pro Kapitel, Motiv aus der stärksten visuellen Szene (LLM wählt anhand der
   Scene Cards + Summary, Kriterium: konkret, statisch, spoilerfrei).
