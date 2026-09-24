@@ -3,7 +3,11 @@ import {
   composeImagePrompt, finalizePlan, planPages, readingLevelForAge,
   validatePictureBook, type PbValidationResult, type ReadingLevel,
 } from '@abg/domain';
-import { GeneratorError, extractJson, type TextGenerator } from './generator';
+import {
+  GeneratorError, extractJson,
+  type CompletionUsage, type TextGenerator,
+} from './generator';
+import { pictureBookJsonSchema } from './vercel-gateway';
 import { PICTUREBOOK_SYSTEM, buildModelPrompt, parsePrompt, type ParsedPrompt } from './prompt';
 
 /**
@@ -49,7 +53,10 @@ export interface CreateBookResult {
   pageCount: PageCount;
   /** Was aus dem Prompt gelesen wurde und was Vorgabe blieb. */
   understood: ParsedPrompt;
-  generator: { name: string; synthetic: boolean };
+  generator: { name: string; synthetic: boolean; modelId?: string };
+  usage?: CompletionUsage;
+  /** Wie oft das Modell nachbessern musste, bis das JSON passte. */
+  repairs: number;
   durationMs: number;
 }
 
@@ -96,15 +103,38 @@ export async function createPictureBook(
     readingLevel, medium, paletteHue, hints: understood,
   });
 
-  const raw = await generator.complete({
+  const baseRequest = {
     system: PICTUREBOOK_SYSTEM,
     prompt: modelPrompt,
+    jsonSchema: pictureBookJsonSchema(),
     temperature: 0.9,
     maxOutputTokens: 8000,
-  });
+  };
 
-  // 5. Pruefen und vervollstaendigen
-  const draft = parseDraft(raw, generator.name);
+  let response = await generator.complete(baseRequest);
+
+  // 5. Pruefen. Bei ungueltigem JSON EIN Nachbesserungsversuch mit der
+  //    konkreten Fehlermeldung — danach ist es ein Fehler, kein Ratespiel.
+  let draft;
+  let repairs = 0;
+  try {
+    draft = parseDraft(response.text, generator.name);
+  } catch (first) {
+    if (!(first instanceof GeneratorError)) throw first;
+    repairs = 1;
+    response = await generator.complete({
+      ...baseRequest,
+      prompt: [
+        modelPrompt,
+        '',
+        'DEIN LETZTES JSON WAR UNGUELTIG.',
+        first.message,
+        'Gib ausschliesslich korrigiertes JSON zurueck. Keine Erklaerung.',
+      ].join('\n'),
+      temperature: 0.4,
+    });
+    draft = parseDraft(response.text, generator.name);
+  }
   const plan = finalizePlan(draft, pageCount);
 
   if (plan.spreads.length !== pages.storySpreads) {
@@ -120,7 +150,13 @@ export async function createPictureBook(
 
   return {
     plan, validation, imagePrompts, readingLevel, pageCount, understood,
-    generator: { name: generator.name, synthetic: generator.synthetic },
+    generator: {
+      name: generator.name,
+      synthetic: generator.synthetic,
+      ...(response.modelId ? { modelId: response.modelId } : {}),
+    },
+    ...(response.usage ? { usage: response.usage } : {}),
+    repairs,
     durationMs: now() - started,
   };
 }

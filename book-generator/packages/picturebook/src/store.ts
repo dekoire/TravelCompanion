@@ -22,7 +22,7 @@ export interface StoredBook {
   plan: PictureBookPlan;
   pageCount: PageCount;
   readingLevel: ReadingLevel;
-  generator: { name: string; synthetic: boolean };
+  generator: { name: string; synthetic: boolean; modelId?: string };
 }
 
 export interface ListOptions {

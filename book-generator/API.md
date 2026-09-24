@@ -8,22 +8,34 @@ curl -X POST localhost:8787/v1/books -H 'content-type: application/json' \
   -d '{"prompt":"Ein kleiner Fuchs namens Nuri, der das Meer sucht"}'
 ```
 
-## Was der Dienst ist und was nicht
+## Modell: Vercel AI Gateway
 
-Er kennt **keine** Abrechnung, keine Kontingente, kein Modell-Routing und keine
-Kostenrechnung. Die gesamte Schnittstelle zu einem Sprachmodell ist eine Funktion:
+Ein Endpunkt, ein Schlüssel, viele Modelle — abgerechnet wird bei Vercel, nicht hier.
+
+```bash
+AI_GATEWAY_API_KEY=...                 # oder VERCEL_OIDC_TOKEN
+ABG_MODEL=anthropic/claude-opus-5      # "anbieter/modell"
+ABG_FALLBACK_MODELS=openai/gpt-5.6-sol,google/gemini-3.6-flash
+npm run serve
+```
+
+**Ohne Schlüssel läuft der Demo-Generator** — dann füllt der Dienst Vorlagen, statt eine
+Geschichte zu schreiben. Er sagt das auch: `generator.synthetic` ist dann `true` und die
+Antwort trägt ein `notice`-Feld.
+
+Der Dienst kennt **keine** Abrechnung, keine Kontingente und keine Kostenrechnung. Die
+gesamte Schnittstelle zu einem Sprachmodell ist eine Funktion:
 
 ```ts
 interface TextGenerator {
   readonly name: string;
   readonly synthetic: boolean;        // true = kein Modell beteiligt
-  complete(req: CompletionRequest): Promise<string>;
+  complete(req: CompletionRequest): Promise<CompletionResult>;
 }
 ```
 
-Wer den Dienst betreibt, bringt seinen Anbieter mit und rechnet dort ab. Der Wert liegt
-in dem, was davor und danach passiert: Druckbogen, Lesestufe, Figurenkonsistenz,
-Bildprompt-Komposition und 18 Prüfungen — alles ohne Modell.
+Der Wert liegt in dem, was davor und danach passiert: Druckbogen, Lesestufe,
+Figurenkonsistenz, Bildprompt-Komposition und 18 Prüfungen — alles ohne Modell.
 
 ## Authentifizierung
 
@@ -79,8 +91,16 @@ Erzeugt ein Buch. Einzige Pflichtangabe ist `prompt`.
 
   "pageCount": 24,
   "readingLevel": "early_reader",
-  "generator": { "name": "demo", "synthetic": true },
-  "notice": "Dieser Entwurf stammt aus einem regelbasierten Demo-Generator, …",
+
+  // Welches Modell geschrieben hat. Bei einer Fallback-Kette ist modelId nicht
+  // zwingend das angefragte Modell — deshalb steht hier, was geantwortet hat.
+  "generator": {
+    "name": "vercel-ai-gateway",
+    "synthetic": false,
+    "modelId": "anthropic/claude-opus-5"
+  },
+  "usage": { "inputTokens": 900, "outputTokens": 4200 },
+  "repairs": 0,              // wie oft das Modell nachbessern musste
 
   "book": {
     "title": "…", "premise": "…", "refrain": "Vielleicht heute.",
@@ -184,32 +204,47 @@ Ohne Schlüssel. Nennt Generator und erlaubte Werte.
 
 ---
 
-## Einen echten Anbieter einsetzen
+## Gateway einrichten
 
 ```ts
-import { HttpJsonGenerator, createPictureBook } from '@abg/picturebook';
+import { VercelGatewayGenerator, createService } from '@abg/picturebook';
 
-const generator = new HttpJsonGenerator({
-  name: 'mein-anbieter',
-  endpoint: 'https://api.example.com/v1/chat',
-  headers: { authorization: `Bearer ${process.env.PROVIDER_KEY}` },
-  buildBody: (req) => ({
-    model: 'mein-modell',
-    messages: [
-      { role: 'system', content: req.system },
-      { role: 'user', content: req.prompt },
-    ],
-    max_tokens: req.maxOutputTokens,
-    temperature: req.temperature,
-  }),
-  readText: (res: any) => res.choices[0].message.content,
+const generator = new VercelGatewayGenerator({
+  apiKey: process.env.AI_GATEWAY_API_KEY!,
+  model: 'anthropic/claude-opus-5',
+  fallbackModels: ['openai/gpt-5.6-sol', 'google/gemini-3.6-flash'],
+  responseFormat: 'json_object',   // oder 'json_schema'
+  provider: { sort: 'cost' },      // Routing-Vorgabe des Gateways
 });
-
-const service = createService({ generator, auth: { keys: { … } } });
 ```
 
-Mehr ist nicht nötig. Prüfungen, Seitenplan und Bildprompts bleiben gleich — sie hängen
-nicht am Anbieter.
+Oder kürzer aus der Umgebung: `gatewayFromEnv(process.env)` — gibt `null` zurück, wenn
+kein Schlüssel gesetzt ist.
+
+### Antwortformat
+
+| Wert | Wirkung |
+|---|---|
+| `json_object` (Vorgabe) | Nur „gib JSON zurück". Breiteste Modellunterstützung. |
+| `json_schema` | Das Schema wird mitgeschickt. Bessere Treue, aber nicht jedes Modell kann es. |
+| `none` | Gar nichts. |
+
+Die Vorgabe ist bewusst `json_object`: Die verbindliche Prüfung macht ohnehin Zod nach der
+Antwort, und ein Schema, das ein Modell nicht versteht, kostet den ganzen Aufruf. Bei
+ungültigem JSON bekommt das Modell **genau einen** Nachbesserungsversuch mit der konkreten
+Fehlermeldung; danach ist es ein Fehler, kein Ratespiel. Das Feld `repairs` sagt, ob es
+nötig war.
+
+Das Schema wird aus dem Zod-Vertrag erzeugt (`pictureBookJsonSchema()`), nicht daneben
+gepflegt — ein Test hält beide in Deckung.
+
+## Einen anderen Anbieter einsetzen
+
+`HttpJsonGenerator` nimmt `buildBody` und `readResult` als Funktionen; damit lässt sich jede
+Chat-API in wenigen Zeilen anbinden, ohne dass das Paket den Anbieter kennt.
+`VercelGatewayGenerator` ist selbst nur eine dünne Schicht darüber.
+
+Prüfungen, Seitenplan und Bildprompts bleiben gleich — sie hängen nicht am Anbieter.
 
 ## Eine eigene Datenbank einsetzen
 
@@ -222,7 +257,7 @@ das älteste weg.
 | | |
 |---|---|
 | Keine Warteschlange | `POST /v1/books` erzeugt synchron. Mit einem echten Modell dauert das 30–180 s — wer das über einen Proxy anbietet, braucht davor eine Job-Warteschlange. |
-| Keine Abrechnung | Kein Token-Zählen, keine Kontingente, keine Limits. Gehört in die Schicht davor. |
+| Keine Abrechnung | Der Tokenverbrauch wird durchgereicht, aber nicht verrechnet. Kontingente und Limits gehören in die Schicht davor. |
 | Keine Bilder | Der Dienst liefert Bildprompts und Platzhalter, keine Illustrationen. |
 | Deutsch | Die Prompt-Heuristik und die Lesestufen sind auf Deutsch ausgelegt. |
 | In-Memory | Ohne eigenen `BookStore` sind die Bücher nach einem Neustart weg. |

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { planPages, validatePictureBook, readingLevelForAge } from '@abg/domain';
 import { renderSpreadPlaceholder, spreadDataUri } from '@abg/render';
 import { DemoGenerator, demoInputFromPrompt } from './demo-generator';
-import { GeneratorError, type CompletionRequest, type TextGenerator } from './generator';
+import {
+  GeneratorError, type CompletionRequest, type CompletionResult, type TextGenerator,
+} from './generator';
 import { createPictureBook, updateSpread, imagePromptsFor } from './pipeline';
 
 const PROMPT = 'Ein kleiner Fuchs namens Nuri, der den Ort sucht, an dem der Wind anfängt';
@@ -13,10 +15,12 @@ function demo(): DemoGenerator { return new DemoGenerator(); }
 class FixedGenerator implements TextGenerator {
   readonly name = 'fixed';
   readonly synthetic = true;
+  calls = 0;
   constructor(private readonly out: string | (() => never)) {}
-  async complete(_req: CompletionRequest): Promise<string> {
+  async complete(_req: CompletionRequest): Promise<CompletionResult> {
+    this.calls++;
     if (typeof this.out === 'function') this.out();
-    return this.out as string;
+    return { text: this.out as string };
   }
 }
 
@@ -109,6 +113,30 @@ describe('Fehler des Generators', () => {
       .rejects.toThrow(/kein gültiges JSON/);
   });
 
+  it('gibt dem Modell genau einen Nachbesserungsversuch', async () => {
+    const gen = new FixedGenerator('kaputt');
+    await expect(createPictureBook({ prompt: PROMPT }, gen)).rejects.toThrow();
+    // Erstversuch plus eine Nachbesserung — danach ist Schluss, kein Ratespiel.
+    expect(gen.calls).toBe(2);
+  });
+
+  it('nimmt eine gelungene Nachbesserung an', async () => {
+    const good = await demo().complete({
+      prompt: 'genau 14 Doppelseiten\nLESESTUFE 3–5\n<idee>Test</idee>\n'
+        + 'Technik: watercolor\nPalette: 120 Grad',
+    });
+    let n = 0;
+    const flaky: TextGenerator = {
+      name: 'flaky', synthetic: true,
+      async complete(): Promise<CompletionResult> {
+        return { text: ++n === 1 ? 'kaputt' : good.text };
+      },
+    };
+    const r = await createPictureBook({ prompt: PROMPT }, flaky);
+    expect(r.repairs).toBe(1);
+    expect(r.validation.ok).toBe(true);
+  });
+
   it('meldet Schemaverstöße mit konkretem Feld', async () => {
     const gen = new FixedGenerator(JSON.stringify({ title: 'X', spreads: [] }));
     await expect(createPictureBook({ prompt: PROMPT }, gen))
@@ -126,9 +154,11 @@ describe('Fehler des Generators', () => {
   it('meldet eine falsche Doppelseitenzahl', async () => {
     // Ein Modell, das 14 statt 22 Doppelseiten liefert, ist ein Fehler — kein
     // stillschweigend akzeptiertes kürzeres Buch.
-    const draft = JSON.parse(await demo().complete({
-      prompt: 'genau 14 Doppelseiten\nLESESTUFE 3–5\n<idee>Test</idee>\nTechnik: watercolor\nPalette: 120 Grad',
-    })) as Record<string, unknown>;
+    const { text } = await demo().complete({
+      prompt: 'genau 14 Doppelseiten\nLESESTUFE 3–5\n<idee>Test</idee>\n'
+        + 'Technik: watercolor\nPalette: 120 Grad',
+    });
+    const draft = JSON.parse(text) as Record<string, unknown>;
     const gen = new FixedGenerator(JSON.stringify(draft));
     await expect(createPictureBook({ prompt: PROMPT, pageCount: 48 }, gen))
       .rejects.toThrow(/22 sind bei 48 Seiten vorgesehen/);

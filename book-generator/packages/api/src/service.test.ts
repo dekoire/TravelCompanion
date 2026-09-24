@@ -1,5 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { DemoGenerator, MemoryBookStore, type TextGenerator } from '@abg/picturebook';
+import {
+  DemoGenerator, MemoryBookStore, type CompletionResult, type TextGenerator,
+} from '@abg/picturebook';
 import { GeneratorError } from '@abg/picturebook';
 import { createService, type Service } from './service';
 
@@ -168,7 +170,7 @@ describe('Generatorfehler werden übersetzt', () => {
     readonly name = 'failing';
     readonly synthetic = false;
     constructor(private readonly kind: 'unavailable' | 'timeout' | 'invalid_output') {}
-    async complete(): Promise<string> {
+    async complete(): Promise<CompletionResult> {
       throw new GeneratorError(`kaputt: ${this.kind}`, this.kind);
     }
   }
@@ -192,7 +194,9 @@ describe('Generatorfehler werden übersetzt', () => {
   it('gibt interne Fehler nicht nach außen weiter', async () => {
     class Boom implements TextGenerator {
       readonly name = 'boom'; readonly synthetic = false;
-      async complete(): Promise<string> { throw new Error('DB-Passwort war falsch'); }
+      async complete(): Promise<CompletionResult> {
+        throw new Error('DB-Passwort war falsch');
+      }
     }
     const { res, json } = await createBook(service(new Boom()));
     expect(res.status).toBe(500);
@@ -358,5 +362,73 @@ describe('Protokoll-Verhalten', () => {
   it('toleriert abschließende Schrägstriche', async () => {
     const res = await service().handle(req('/v1/health/', {}, null));
     expect(res.status).toBe(200);
+  });
+});
+
+describe('Mit einem echten Modell über das Vercel AI Gateway', () => {
+  // Gemocktes fetch: liefert einen gültigen Entwurf im OpenAI-Antwortformat.
+  async function gatewayService(draftJson: string, model = 'anthropic/claude-opus-5') {
+    const { VercelGatewayGenerator } = await import('@abg/picturebook');
+    const fetchImpl = (async () => new Response(JSON.stringify({
+      model,
+      choices: [{ index: 0, message: { content: draftJson }, finish_reason: 'stop' }],
+      usage: { prompt_tokens: 900, completion_tokens: 4200 },
+    }), { status: 200, headers: { 'content-type': 'application/json' } })) as unknown as typeof fetch;
+
+    return createService({
+      generator: new VercelGatewayGenerator({
+        apiKey: 'k', model: 'anthropic/claude-opus-5', fetchImpl,
+      }),
+      auth: AUTH, store: new MemoryBookStore(),
+      now: () => 1_700_000_000_000,
+      makeId: () => 'pb_gw_1',
+    });
+  }
+
+  /** Gültiger Entwurf — vom Demo-Generator erzeugt, damit er dem Schema entspricht. */
+  async function validDraft(): Promise<string> {
+    const { DemoGenerator } = await import('@abg/picturebook');
+    const { text } = await new DemoGenerator().complete({
+      prompt: 'Schreibe ein Bilderbuch mit genau 14 Doppelseiten.\n'
+        + '<idee>Ein Fuchs namens Nuri, der das Meer sucht</idee>\n'
+        + 'LESESTUFE 3–5\nTechnik: watercolor. Farbton der Palette: 120 Grad.',
+    });
+    return text;
+  }
+
+  it('erzeugt ein Buch über das Gateway', async () => {
+    const s = await gatewayService(await validDraft());
+    const res = await s.handle(post('/v1/books', { prompt: 'Ein Fuchs, der das Meer sucht' }));
+    expect(res.status).toBe(201);
+    const j = await res.json() as any;
+    expect(j.book.spreads).toHaveLength(14);
+    expect(j.validation.ok).toBe(true);
+  });
+
+  it('weist aus, dass ein echtes Modell geschrieben hat', async () => {
+    const s = await gatewayService(await validDraft());
+    const j = await (await s.handle(post('/v1/books', { prompt: 'Ein Fuchs' }))).json() as any;
+    expect(j.generator.synthetic).toBe(false);
+    expect(j.generator.name).toBe('vercel-ai-gateway');
+    expect(j.notice).toBeUndefined();
+  });
+
+  it('nennt das Modell, das tatsächlich geantwortet hat', async () => {
+    const s = await gatewayService(await validDraft(), 'openai/gpt-5.6-sol');
+    const j = await (await s.handle(post('/v1/books', { prompt: 'Ein Fuchs' }))).json() as any;
+    expect(j.generator.modelId).toBe('openai/gpt-5.6-sol');
+  });
+
+  it('gibt den Tokenverbrauch weiter', async () => {
+    const s = await gatewayService(await validDraft());
+    const j = await (await s.handle(post('/v1/books', { prompt: 'Ein Fuchs' }))).json() as any;
+    expect(j.usage).toEqual({ inputTokens: 900, outputTokens: 4200 });
+  });
+
+  it('meldet einen unbrauchbaren Entwurf als 502, nicht als 500', async () => {
+    const s = await gatewayService('{"title":"unvollständig"}');
+    const res = await s.handle(post('/v1/books', { prompt: 'Ein Fuchs' }));
+    expect(res.status).toBe(502);
+    expect((await res.json() as any).error.code).toBe('generator_failed');
   });
 });

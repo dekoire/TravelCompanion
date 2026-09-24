@@ -12,7 +12,12 @@ npm run build:preview                  # Werkzeug: Wizard, Andruckbogen, Editor
 npm run build:demo                     # fertiges Demo-Buch zum Durchblaettern
 ```
 
-Keine API-Schlüssel nötig: alles läuft gegen Mock- und Demo-Generatoren.
+Ohne Schlüssel läuft der Demo-Generator. Mit **Vercel AI Gateway** schreibt ein echtes
+Modell:
+
+```bash
+AI_GATEWAY_API_KEY=... ABG_MODEL=anthropic/claude-opus-5 npm run serve
+```
 
 ```bash
 curl -X POST localhost:8787/v1/books -H 'content-type: application/json' \
@@ -133,7 +138,8 @@ new MockProvider({ scripts: {
 | `picturebook/store.test.ts` | 12 | Ablage, Mandantentrennung, Blättern |
 | `api/service.test.ts` | 43 | alle Endpunkte, Fehlerübersetzung, Protokoll |
 | `api/auth.test.ts` | 14 | Schlüssel, Mandanten, Zeitkonstanz |
-| **Summe** | **497** | |
+| `picturebook/vercel-gateway.test.ts` | 33 | Anfrageaufbau, Fallbacks, Fehlerklassen, Schlüsselschutz |
+| **Summe** | **537** | |
 
 ## Drei Stellen, an denen die Tests die Doku korrigiert haben
 
@@ -171,13 +177,17 @@ mit einem String rein und einem String raus.
 interface TextGenerator {
   readonly name: string;
   readonly synthetic: boolean;   // true = kein Modell beteiligt
-  complete(req: CompletionRequest): Promise<string>;
+  complete(req: CompletionRequest): Promise<CompletionResult>;
 }
 ```
 
-Wer den Dienst betreibt, bringt seinen Anbieter mit und rechnet dort ab. Der Wert liegt
-in dem, was davor und danach passiert — Druckbogen, Lesestufe, Figurenkonsistenz,
-Bildprompt-Komposition und 18 Prüfungen, alles ohne Modell.
+Angebunden ist **Vercel AI Gateway**: ein Endpunkt, ein Schlüssel, viele Modelle,
+abgerechnet bei Vercel. Fallback-Ketten laufen über das Gateway, nicht über eigenen Code.
+Die Antwort sagt, welches Modell tatsächlich geschrieben hat und was es gekostet hat —
+verrechnet wird hier nichts.
+
+Der Wert liegt in dem, was davor und danach passiert: Druckbogen, Lesestufe,
+Figurenkonsistenz, Bildprompt-Komposition und 18 Prüfungen, alles ohne Modell.
 
 ## Bilderbuch-Track
 

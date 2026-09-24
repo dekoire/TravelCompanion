@@ -8,12 +8,19 @@
  *   ABG_API_KEYS=key1:kunde_a     Schluessel:Mandant, kommagetrennt
  *   ABG_ALLOW_ANONYMOUS=lokal     ohne Schluessel arbeiten (nur lokal!)
  *
+ *   AI_GATEWAY_API_KEY=...        Vercel AI Gateway; ohne das laeuft der
+ *                                 Demo-Generator und es entsteht keine
+ *                                 erzeugte Geschichte, nur eine gefuellte Vorlage
+ *   ABG_MODEL=anthropic/claude-opus-5
+ *   ABG_FALLBACK_MODELS=openai/gpt-5.6-sol,google/gemini-3.6-flash
+ *   ABG_RESPONSE_FORMAT=json_object | json_schema | none
+ *
  * Der Server haelt die Buecher im Speicher. Fuer den Betrieb ein BookStore
  * gegen die eigene Datenbank einsetzen — die Schnittstelle hat fuenf Methoden.
  */
 import { createServer, type IncomingMessage } from 'node:http';
 import { createService, parseKeys } from '@abg/api';
-import { DemoGenerator } from '@abg/picturebook';
+import { DemoGenerator, gatewayFromEnv } from '@abg/picturebook';
 
 const port = Number(process.env.PORT ?? 8787);
 const keys = parseKeys(process.env.ABG_API_KEYS);
@@ -25,8 +32,12 @@ if (Object.keys(keys).length === 0 && !anonymous) {
   process.exit(1);
 }
 
+// Mit Schluessel schreibt ein echtes Modell, ohne Schluessel der Demo-Generator.
+const gateway = gatewayFromEnv(process.env);
+const generator = gateway ?? new DemoGenerator();
+
 const service = createService({
-  generator: new DemoGenerator(),
+  generator,
   auth: { keys, ...(anonymous ? { allowAnonymousAs: anonymous } : {}) },
 });
 
@@ -71,6 +82,12 @@ function readBody(req: IncomingMessage): Promise<string> {
 
 server.listen(port, () => {
   console.log(`Bilderbuch-Service auf http://localhost:${port}`);
+  if (gateway) {
+    console.log(`  Modell: ${gateway.model} ueber Vercel AI Gateway`);
+  } else {
+    console.log('  Demo-Generator (kein AI_GATEWAY_API_KEY gesetzt) —');
+    console.log('  die Geschichte kommt aus Vorlagen, nicht aus einem Modell.');
+  }
   console.log(`  GET  /v1/health`);
   console.log(`  POST /v1/books   {"prompt": "Ein Fuchs, der das Meer sucht"}`);
   if (anonymous) console.log(`  (ohne Schluessel, alles gehoert "${anonymous}")`);

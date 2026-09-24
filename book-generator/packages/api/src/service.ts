@@ -66,7 +66,11 @@ export function createService(options: ServiceOptions): Service {
     if (path === `${base}/health` || path === '/health') {
       return jsonResponse({
         status: 'ok',
-        generator: { name: generator.name, synthetic: generator.synthetic },
+        generator: {
+          name: generator.name,
+          synthetic: generator.synthetic,
+          ...('model' in generator ? { model: (generator as { model: string }).model } : {}),
+        },
         pageCounts: PAGE_COUNTS,
         readingLevels: LEVELS,
         media: MEDIA_LIST,
@@ -191,6 +195,8 @@ export function createService(options: ServiceOptions): Service {
       validation: result.validation,
       imagePrompts: result.imagePrompts,
       durationMs: result.durationMs,
+      repairs: result.repairs,
+      ...(result.usage ? { usage: result.usage } : {}),
     }), 201, { location: `${base}/books/${book.id}` });
   }
 

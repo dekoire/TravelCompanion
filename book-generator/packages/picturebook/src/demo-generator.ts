@@ -1,5 +1,5 @@
 import { READING_RULES, type ReadingLevel } from '@abg/domain';
-import type { CompletionRequest, TextGenerator } from './generator';
+import type { CompletionRequest, CompletionResult, TextGenerator } from './generator';
 import { goalObject, parsePrompt } from './prompt';
 
 /**
@@ -370,8 +370,8 @@ export class DemoGenerator implements TextGenerator {
   readonly synthetic = true;
   readonly calls: CompletionRequest[] = [];
 
-  async complete(req: CompletionRequest): Promise<string> {
+  async complete(req: CompletionRequest): Promise<CompletionResult> {
     this.calls.push(req);
-    return JSON.stringify(buildDemoDraft(demoInputFromPrompt(req.prompt)));
+    return { text: JSON.stringify(buildDemoDraft(demoInputFromPrompt(req.prompt))) };
   }
 }
